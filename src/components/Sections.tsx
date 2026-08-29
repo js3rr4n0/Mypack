@@ -4,28 +4,54 @@ import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
-/** ~4,200 impressions a day walking the city. */
-const DAILY_IMPRESSIONS = 4200;
-const START = new Date("2026-01-01T00:00:00Z").getTime();
-
-export function ImpressionCounter() {
-  const [value, setValue] = useState(0);
+/**
+ * Visitas reales al sitio, contadas contra la base de datos.
+ *
+ * Registra la visita una sola vez por sesion del navegador y muestra el total.
+ * Si la consulta falla no se muestra nada: antes este contador mostraba una
+ * estimacion inventada, y un numero falso en la pagina es peor que ninguno.
+ */
+export function VisitCounter() {
+  const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
-    const compute = () => {
-      const days = Math.max((Date.now() - START) / 86_400_000, 1);
-      const perMs = (DAILY_IMPRESSIONS / 86_400_000) * 1000;
-      setValue(Math.floor(days * DAILY_IMPRESSIONS + (Date.now() % 1000) * perMs));
+    let alive = true;
+
+    const already = (() => {
+      try {
+        return sessionStorage.getItem("mypack:counted") === "1";
+      } catch {
+        return false;
+      }
+    })();
+
+    fetch("/api/visit", { method: already ? "GET" : "POST" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!alive || typeof json?.total !== "number") return;
+        setTotal(json.total);
+        try {
+          sessionStorage.setItem("mypack:counted", "1");
+        } catch {
+          /* modo privado: se cuenta de nuevo, no pasa nada */
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
     };
-    compute();
-    const id = setInterval(compute, 1200);
-    return () => clearInterval(id);
   }, []);
 
+  if (total === null) return null;
+
   return (
-    <span className="tabular-nums text-lime">
-      {new Intl.NumberFormat("en-US").format(value)}
-    </span>
+    <p className="mt-6 text-sm text-white/45">
+      <span className="tabular-nums text-lime">
+        {new Intl.NumberFormat("en-US").format(total)}
+      </span>{" "}
+      {total === 1 ? "visit" : "visits"} so far
+    </p>
   );
 }
 

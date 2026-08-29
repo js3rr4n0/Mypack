@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import BidModal from "./BidModal";
 import CanvasBoundary from "./CanvasBoundary";
 import Pack360 from "./Pack360";
-import { FAQ, Footer, HowItWorks, ImpressionCounter, Leaderboard } from "./Sections";
+import { FAQ, Footer, HowItWorks, Leaderboard, VisitCounter } from "./Sections";
 import { SPOTS, formatMoney, type SpotName } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
@@ -105,9 +105,7 @@ export default function Landing() {
             Your logo walks the city with me every single day.
           </p>
 
-          <p className="mt-6 text-sm text-white/45">
-            <ImpressionCounter /> estimated impressions since I started
-          </p>
+          <VisitCounter />
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <button

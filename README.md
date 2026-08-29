@@ -97,7 +97,19 @@ npm run dev
 | `WOMPI_WEBHOOK_TOKEN` | Secreto propio que viaja en la URL del webhook |
 | `WOMPI_ALLOW_TEST_TRANSACTIONS` | `true` para aceptar pagos con `esReal=false` |
 | `NEXT_PUBLIC_SITE_URL` | `https://mypack.lol`. Si se deja vacía se usa la URL de Vercel |
+| `VISIT_SALT` | Sal del hash del contador de visitas (opcional) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob (opcional; sin él se usa base64) |
+
+## Contador de visitas
+
+El número del hero son **visitas reales**, no una estimación. Cada visitante se
+registra una vez por día en la tabla `visits`, identificado por
+`SHA-256(ip + user-agent + fecha + VISIT_SALT)`. No se guarda la IP ni nada que
+identifique a la persona, y el hash cambia cada día, así que no se puede seguir a
+nadie entre un día y otro. Los bots se descartan por user-agent.
+
+En el navegador se registra una sola vez por sesión. Si la base de datos no
+responde, el contador **no se muestra** — nunca un número inventado.
 
 ## Flujo de pago
 
@@ -131,7 +143,9 @@ Wompi **no firma** sus notificaciones, así que se usan dos defensas:
 
 | Ruta | Descripción |
 |---|---|
-| `GET /api/spots` | Estado de las 6 zonas (degrada a datos estáticos sin DB) |
+| `GET /api/spots` | Estado de las zonas activas (degrada a datos estáticos sin DB) |
+| `POST /api/visit` | Registra la visita del día y devuelve el total |
+| `GET /api/visit` | Total de visitas |
 | `POST /api/bids` | Inicia una puja y devuelve el checkout de Wompi |
 | `GET /api/bids/status?ref=` | Estado de una puja |
 | `POST /api/upload` | Sube el logo (Blob o base64), máx 5MB, PNG/SVG |

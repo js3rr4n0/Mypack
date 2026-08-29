@@ -54,6 +54,17 @@ export const bids = pgTable("bids", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+/**
+ * Visitas al sitio. Una fila por visitante y por dia: `visitorHash` es
+ * SHA-256(ip + user-agent + fecha + salt), asi que no se guarda ninguna IP ni
+ * nada que identifique a la persona, y recargar la pagina no infla el numero.
+ */
+export const visits = pgTable("visits", {
+  id: serial("id").primaryKey(),
+  visitorHash: varchar("visitor_hash", { length: 64 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const spotsRelations = relations(spots, ({ one, many }) => ({
   currentBrand: one(brands, {
     fields: [spots.currentBrandId],
@@ -74,3 +85,4 @@ export const bidsRelations = relations(bids, ({ one }) => ({
 export type Spot = typeof spots.$inferSelect;
 export type Brand = typeof brands.$inferSelect;
 export type Bid = typeof bids.$inferSelect;
+export type Visit = typeof visits.$inferSelect;

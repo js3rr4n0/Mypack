@@ -60,6 +60,13 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
+CREATE TABLE IF NOT EXISTS "visits" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"visitor_hash" varchar(64) NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	CONSTRAINT "visits_visitor_hash_unique" UNIQUE("visitor_hash")
+);
+
 -- Las 6 zonas de la mochila. min_bid va en centavos de USD.
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES
