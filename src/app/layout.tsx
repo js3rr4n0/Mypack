@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const display = Space_Grotesk({
@@ -10,14 +11,14 @@ const display = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mypack.lol"),
+  metadataBase: new URL(siteUrl()),
   title: "My Pack. Your Brand. — mypack.lol",
   description:
     "Soy un walking billboard. Tu logo camina conmigo todos los días por la ciudad. Subasta abierta por 6 zonas de mi mochila.",
   openGraph: {
     title: "My Pack. Your Brand.",
     description: "Tu logo camina conmigo todos los días por la ciudad.",
-    url: "https://mypack.lol",
+    url: siteUrl(),
     siteName: "mypack.lol",
     locale: "es_SV",
     type: "website",

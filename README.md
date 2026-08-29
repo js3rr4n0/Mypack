@@ -47,7 +47,7 @@ npm run dev
 | `WOMPI_API_SECRET` | API Secret del panel (`client_secret`) |
 | `WOMPI_WEBHOOK_TOKEN` | Secreto propio que viaja en la URL del webhook |
 | `WOMPI_ALLOW_TEST_TRANSACTIONS` | `true` para aceptar pagos con `esReal=false` |
-| `NEXT_PUBLIC_SITE_URL` | `https://mypack.lol` |
+| `NEXT_PUBLIC_SITE_URL` | `https://mypack.lol`. Si se deja vacía se usa la URL de Vercel |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob (opcional; sin él se usa base64) |
 
 ## Flujo de pago

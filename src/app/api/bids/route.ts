@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, spots, brands, bids } from "@/db";
 import { nextBidAmount, formatMoney } from "@/lib/spots";
 import { newReference, startCheckout } from "@/lib/wompi";
+import { siteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -114,8 +115,7 @@ export async function POST(req: Request) {
       status: "pending",
     });
 
-    const origin =
-      process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
+    const origin = siteUrl();
 
     const checkout = await startCheckout({
       reference,
