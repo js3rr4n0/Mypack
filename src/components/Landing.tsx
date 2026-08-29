@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import BidModal from "./BidModal";
 import PackMockup from "./PackMockup";
 import { FAQ, Footer, HowItWorks, ImpressionCounter, Leaderboard } from "./Sections";
-import { SPOTS, formatMoney, minBidOf, type SpotName } from "@/lib/spots";
+import { SPOTS, formatMoney, type SpotName } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 const Backpack3D = dynamic(() => import("./Backpack3D"), {
@@ -23,10 +23,10 @@ const FALLBACK: SpotView[] = SPOTS.map((s, i) => ({
   displayName: s.displayName,
   description: s.description,
   positionOrder: s.positionOrder,
-  minBid: minBidOf(s),
+  minBid: s.minBid,
   currentPrice: 0,
   isActive: true,
-  nextBid: minBidOf(s),
+  nextBid: s.minBid,
   brand: null,
 }));
 

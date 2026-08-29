@@ -1,30 +1,21 @@
 /**
- * Wompi El Salvador opera en USD; Wompi Colombia en COP.
- * Internamente TODO se guarda en centavos (enteros) sin importar la moneda,
- * asi el esquema de base de datos no cambia entre paises.
+ * Wompi El Salvador opera en USD. Internamente todos los precios se guardan en
+ * centavos (enteros) para no arrastrar errores de punto flotante.
  */
-export type Currency = "USD" | "COP";
-
-export const CURRENCY: Currency =
-  (process.env.NEXT_PUBLIC_CURRENCY as Currency) ?? "USD";
-
-const LOCALE: Record<Currency, string> = {
-  USD: "en-US",
-  COP: "es-CO",
-};
+export const CURRENCY = "USD";
 
 /** Incremento minimo para superar una puja, en centavos. */
-export const MIN_INCREMENT: number = CURRENCY === "USD" ? 500 : 2_000_000;
+export const MIN_INCREMENT = 500; // $5.00
 
-export function formatMoney(cents: number, currency: Currency = CURRENCY): string {
-  return new Intl.NumberFormat(LOCALE[currency], {
+export function formatMoney(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
-    maximumFractionDigits: currency === "COP" ? 0 : 2,
+    currency: CURRENCY,
+    maximumFractionDigits: 2,
   }).format(cents / 100);
 }
 
-/** Centavos -> unidades decimales (lo que espera el campo `monto` de Wompi SV). */
+/** Centavos -> unidades decimales (lo que espera el campo `monto` de Wompi). */
 export function centsToDecimal(cents: number): number {
   return Math.round(cents) / 100;
 }

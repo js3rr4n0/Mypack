@@ -139,7 +139,7 @@ export function FAQ() {
     },
     {
       q: "¿Cómo se paga?",
-      a: "Con Wompi: tarjeta, PSE, Nequi o Bancolombia. Tu logo se publica automáticamente cuando la transacción queda aprobada.",
+      a: "Con Wompi: tarjeta de crédito o débito y QuickPay (QR). Tu logo se publica automáticamente cuando la transacción queda aprobada.",
     },
     {
       q: "¿Aceptan cualquier marca?",
@@ -175,7 +175,7 @@ export function Footer() {
     <footer className="border-t border-white/5 px-5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-white/35 sm:flex-row">
         <p className="font-display font-semibold text-white/70">mypack.lol</p>
-        <p>Un walking billboard en Colombia. Pagos por Wompi.</p>
+        <p>Un walking billboard. Pagos seguros por Wompi.</p>
         <p>© {new Date().getFullYear()}</p>
       </div>
     </footer>

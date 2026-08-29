@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 import { and, eq, ne } from "drizzle-orm";
 import { db, spots, bids } from "@/db";
-import { COUNTRY, resolveEvent } from "@/lib/wompi";
+import { resolveEvent } from "@/lib/wompi";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/webhook/wompi
  *
- * SV: Wompi notifica al urlWebhook del enlace de pago. Como el evento no viene
- *     firmado, la URL lleva un token secreto y el estado se reconfirma contra
- *     GET /TransaccionCompra/{id}.
- * CO: evento `transaction.updated` con checksum verificado.
- *
- * En ambos casos la zona solo cambia de dueno cuando el pago quedo aprobado.
+ * Wompi notifica al urlWebhook del enlace de pago. Como el evento no viene
+ * firmado, la URL lleva un token secreto y el estado se reconfirma contra
+ * GET /TransaccionCompra/{id}. La zona solo cambia de dueno con el pago aprobado.
  */
 export async function POST(req: Request) {
   const payload = await req.json().catch(() => null);
@@ -27,10 +24,6 @@ export async function POST(req: Request) {
   } catch (error) {
     console.warn("[wompi] evento rechazado:", error);
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
-  if ("ignored" in resolved) {
-    return NextResponse.json({ ok: true, ignored: resolved.ignored });
   }
 
   const { reference, transactionId, status } = resolved;
@@ -93,5 +86,5 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, endpoint: "wompi webhook", country: COUNTRY });
+  return NextResponse.json({ ok: true, endpoint: "wompi webhook" });
 }

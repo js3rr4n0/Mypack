@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db, spots } from "./index";
-import { SPOTS, minBidOf } from "../lib/spots";
+import { SPOTS } from "../lib/spots";
 
 async function main() {
   for (const spot of SPOTS) {
@@ -11,7 +11,7 @@ async function main() {
         displayName: spot.displayName,
         description: spot.description,
         positionOrder: spot.positionOrder,
-        minBid: minBidOf(spot),
+        minBid: spot.minBid,
         currentPrice: 0,
         isActive: true,
       })
@@ -21,7 +21,7 @@ async function main() {
           displayName: spot.displayName,
           description: spot.description,
           positionOrder: spot.positionOrder,
-          minBid: minBidOf(spot),
+          minBid: spot.minBid,
         },
       });
     console.log(`✓ ${spot.name}`);
