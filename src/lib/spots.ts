@@ -29,7 +29,7 @@ export const SPOTS: SpotConfig[] = [
     name: "top_flap",
     displayName: "Solapa Superior",
     description:
-      "La primera cosa que ve alguien detras de mi en la fila del cafe. Visibilidad maxima.",
+      "Lo primero que ve quien va detrás de mí en la fila del café. Visibilidad máxima.",
     positionOrder: 1,
     minBid: 5_000,
     premium: true,
@@ -41,7 +41,7 @@ export const SPOTS: SpotConfig[] = [
     name: "main_front",
     displayName: "Panel Frontal",
     description:
-      "El billboard. El panel mas grande y el que mas tiempo pasa a la altura de los ojos.",
+      "El billboard. El panel más grande y el que más tiempo pasa a la altura de los ojos.",
     positionOrder: 2,
     minBid: 7_500,
     premium: true,
@@ -63,7 +63,7 @@ export const SPOTS: SpotConfig[] = [
   {
     name: "left_side",
     displayName: "Lateral Izquierdo",
-    description: "Se ve todo el tiempo en el bus, el metro y el ascensor.",
+    description: "Se ve todo el tiempo en el microbús, la fila del banco y el ascensor.",
     positionOrder: 4,
     minBid: 2_000,
     premium: false,
@@ -85,7 +85,7 @@ export const SPOTS: SpotConfig[] = [
   {
     name: "top_handle",
     displayName: "Zona del Asa",
-    description: "Pequena pero se ve en cada foto y cada vez que levanto la mochila.",
+    description: "Pequeña, pero sale en cada foto y cada vez que levanto la mochila.",
     positionOrder: 6,
     minBid: 1_200,
     premium: false,

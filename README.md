@@ -28,13 +28,32 @@ punto flotante. Para tomar una zona ocupada se paga `current_price + $5`. Si una
 marca ya había estado en esa zona y la sacaron, se le acredita lo que pagó y solo
 cubre la diferencia.
 
+## Base de datos
+
+Hay dos caminos; con cualquiera queda igual.
+
+**A. Desde el navegador (sin instalar nada).** Abre tu proyecto en Neon →
+*SQL Editor* → pega el contenido de [`drizzle/setup.sql`](drizzle/setup.sql) → Run.
+Crea las tres tablas y siembra las 6 zonas. Es idempotente: se puede correr las
+veces que quieras. Al final imprime las 6 filas como comprobación.
+
+**B. Desde la terminal.**
+
+```bash
+cp .env.example .env.local     # pon aquí tu DATABASE_URL
+npm run db:push                # crea las tablas
+npm run db:seed                # siembra las 6 zonas
+```
+
+Si cambias las zonas o los precios en `src/lib/spots.ts`, regenera el SQL con
+`npm run db:sql`.
+
 ## Puesta en marcha local
 
 ```bash
 npm install
 cp .env.example .env.local     # completa las variables
-npm run db:push                # crea las tablas en Neon
-npm run db:seed                # siembra las 6 zonas
+npm run db:sql                 # (opcional) regenera drizzle/setup.sql
 npm run dev
 ```
 
@@ -93,8 +112,8 @@ Wompi **no firma** sus notificaciones, así que se usan dos defensas:
 1. Importa el repo en Vercel (framework detectado: Next.js).
 2. Carga todas las variables de entorno del `.env.example` en *Settings → Environment
    Variables* (Production y Preview).
-3. Crea la base en **Neon** y corre `npm run db:push && npm run db:seed` una vez
-   apuntando a la base de producción.
+3. Crea la base en **Neon** y corre `drizzle/setup.sql` en su SQL Editor (ver
+   [Base de datos](#base-de-datos)).
 4. El webhook no se registra a mano: cada enlace de pago se crea con
    `urlWebhook = https://mypack.lol/api/webhook/wompi?token=WOMPI_WEBHOOK_TOKEN`.
 5. Apunta el dominio `mypack.lol` al proyecto en *Settings → Domains*.
