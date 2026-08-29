@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { formatMoney, MIN_INCREMENT } from "@/lib/spots";
-import { removeFlatBackground, DARK_LOGO_THRESHOLD } from "@/lib/logo";
+import {
+  removeFlatBackground,
+  hasFlatBackground,
+  DARK_LOGO_THRESHOLD,
+} from "@/lib/logo";
 import type { SpotView } from "@/lib/types";
 
 interface Props {
@@ -19,12 +23,14 @@ export default function BidModal({ spot, onClose }: Props) {
   const [twitter, setTwitter] = useState("");
   const [instagram, setInstagram] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
-  const [logoBase64, setLogoBase64] = useState<string | null>(null);
-  const [uploaded, setUploaded] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [rawFile, setRawFile] = useState<File | null>(null);
-  const [cutout, setCutout] = useState(true);
-  const [hadBackground, setHadBackground] = useState(false);
+  // El archivo se guarda en el navegador y solo se sube al enviar el
+  // formulario, para poder recortarlo y compararlo antes de comprometerse.
+  const [fileName, setFileName] = useState("logo.png");
+  const [original, setOriginal] = useState<string | null>(null);
+  const [cut, setCut] = useState<string | null>(null);
+  const [useCut, setUseCut] = useState(false);
+  const [canCut, setCanCut] = useState(false);
+  const [cutting, setCutting] = useState(false);
   const [tooDark, setTooDark] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,55 +50,57 @@ export default function BidModal({ spot, onClose }: Props) {
 
   if (!spot) return null;
 
-  const preview = uploaded ?? logoBase64 ?? (logoUrl.trim() || null);
+  const preview = (useCut ? cut : original) ?? (logoUrl.trim() || null);
 
-  async function handleFile(file: File, removeBg = cutout) {
+  async function handleFile(file: File) {
     setError(null);
     if (file.size > MAX_BYTES) {
       setError("The logo must be under 5MB.");
       return;
     }
-    setRawFile(file);
-    setUploading(true);
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    setFileName(file.name);
+    setOriginal(dataUrl);
+    setCut(null);
+    setUseCut(false);
+    setLogoUrl("");
+    setTooDark(false);
+    // Solo se ofrece el recorte si de verdad hay un fondo plano que quitar. Un
+    // SVG es vectorial, y un PNG que ya trae transparencia no necesita nada.
+    setCanCut(
+      file.type === "image/svg+xml" ? false : await hasFlatBackground(file)
+    );
+  }
+
+  /** Recorta el fondo bajo demanda y deja ver el resultado antes de decidir. */
+  async function handleCut() {
+    if (!original) return;
+    setCutting(true);
+    setError(null);
     try {
-      let toUpload: File = file;
-
-      // Los SVG ya son vectoriales y suelen venir con fondo transparente.
-      if (removeBg && file.type !== "image/svg+xml") {
-        try {
-          const cleaned = await removeFlatBackground(file);
-          setHadBackground(cleaned.removed);
-          setTooDark(cleaned.luminance < DARK_LOGO_THRESHOLD);
-          if (cleaned.removed) {
-            const blob = await (await fetch(cleaned.dataUrl)).blob();
-            toUpload = new File([blob], file.name.replace(/\.[^.]+$/, "") + ".png", {
-              type: "image/png",
-            });
-          }
-        } catch {
-          /* si el recorte falla se sube el original */
-        }
-      } else if (file.type !== "image/svg+xml") {
-        setHadBackground(false);
+      const file = await dataUrlToFile(original, fileName);
+      const cleaned = await removeFlatBackground(file);
+      if (!cleaned.removed) {
+        setError(
+          "This logo has no flat background to remove — it is either already transparent or its backdrop is not a solid color."
+        );
+        setCanCut(false);
+        return;
       }
-
-      const form = new FormData();
-      form.append("file", toUpload);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Could not upload the logo");
-      if (json.url) {
-        setUploaded(json.url);
-        setLogoBase64(null);
-      } else {
-        setLogoBase64(json.base64);
-        setUploaded(null);
-      }
-      setLogoUrl("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error uploading the logo");
+      setCut(cleaned.dataUrl);
+      setUseCut(true);
+      setTooDark(cleaned.luminance < DARK_LOGO_THRESHOLD);
+    } catch {
+      setError("Could not process this image. You can upload it as it is.");
     } finally {
-      setUploading(false);
+      setCutting(false);
     }
   }
 
@@ -101,6 +109,20 @@ export default function BidModal({ spot, onClose }: Props) {
     setError(null);
     setSubmitting(true);
     try {
+      let uploadedUrl: string | null = null;
+      let uploadedBase64: string | null = null;
+
+      const chosen = useCut ? cut : original;
+      if (chosen) {
+        const form = new FormData();
+        form.append("file", await dataUrlToFile(chosen, fileName));
+        const up = await fetch("/api/upload", { method: "POST", body: form });
+        const json = await up.json();
+        if (!up.ok) throw new Error(json.error ?? "Could not upload the logo");
+        uploadedUrl = json.url ?? null;
+        uploadedBase64 = json.base64 ?? null;
+      }
+
       const res = await fetch("/api/bids", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,8 +133,8 @@ export default function BidModal({ spot, onClose }: Props) {
           website,
           twitter,
           instagram,
-          logoUrl: uploaded ?? (logoUrl.trim() || null),
-          logoBase64,
+          logoUrl: uploadedUrl ?? (logoUrl.trim() || null),
+          logoBase64: uploadedBase64,
         }),
       });
       const json = await res.json();
@@ -195,7 +217,7 @@ export default function BidModal({ spot, onClose }: Props) {
                 onClick={() => fileRef.current?.click()}
                 className="flex-1 rounded-xl border border-dashed border-white/20 px-4 py-3 text-sm text-white/70 transition hover:border-lime hover:text-lime"
               >
-                {uploading ? "Uploading…" : "Upload a file"}
+                {original ? "Choose another file" : "Upload a file"}
               </button>
               <input
                 ref={fileRef}
@@ -212,8 +234,11 @@ export default function BidModal({ spot, onClose }: Props) {
               value={logoUrl}
               onChange={(e) => {
                 setLogoUrl(e.target.value);
-                setUploaded(null);
-                setLogoBase64(null);
+                setOriginal(null);
+                setCut(null);
+                setUseCut(false);
+                setCanCut(false);
+                setTooDark(false);
               }}
               className={`${inputCls} mt-2`}
               placeholder="…or paste the logo URL"
@@ -241,24 +266,56 @@ export default function BidModal({ spot, onClose }: Props) {
                   </p>
                 )}
 
-                {hadBackground && (
-                  <label className="flex cursor-pointer items-start gap-2 text-xs text-white/50">
-                    <input
-                      type="checkbox"
-                      checked={cutout}
-                      disabled={uploading}
-                      onChange={(e) => {
-                        setCutout(e.target.checked);
-                        if (rawFile) handleFile(rawFile, e.target.checked);
-                      }}
-                      className="mt-0.5 accent-lime"
-                    />
-                    <span>
-                      Background removed. Your logo had a flat backdrop — without
-                      it, it sits on the fabric instead of looking like a sticker.
-                      Uncheck to keep the original.
-                    </span>
-                  </label>
+                {canCut && !cut && (
+                  <button
+                    type="button"
+                    onClick={handleCut}
+                    disabled={cutting}
+                    className="w-full rounded-xl border border-white/15 px-4 py-2.5 text-xs font-semibold text-white/75 transition hover:border-lime hover:text-lime disabled:opacity-50"
+                  >
+                    {cutting ? "Removing background…" : "Remove background"}
+                  </button>
+                )}
+
+                {cut && (
+                  <div className="space-y-2">
+                    {/* Se dejan ver las dos, para que la marca elija. */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { label: "Original", src: original!, on: false },
+                        { label: "No background", src: cut, on: true },
+                      ].map((opt) => (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => setUseCut(opt.on)}
+                          className={`rounded-xl border bg-black p-2 transition ${
+                            useCut === opt.on
+                              ? "border-lime"
+                              : "border-white/10 hover:border-white/30"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={opt.src}
+                            alt={opt.label}
+                            className="mx-auto h-10 w-auto max-w-full object-contain"
+                          />
+                          <span
+                            className={`mt-1.5 block text-[10px] uppercase tracking-wider ${
+                              useCut === opt.on ? "text-lime" : "text-white/40"
+                            }`}
+                          >
+                            {opt.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-white/35">
+                      Without the backdrop the logo sits on the fabric instead of
+                      looking like a sticker. Pick whichever you prefer.
+                    </p>
+                  </div>
                 )}
               </div>
             )}
@@ -311,7 +368,7 @@ export default function BidModal({ spot, onClose }: Props) {
 
           <button
             type="submit"
-            disabled={submitting || uploading}
+            disabled={submitting || cutting}
             className="w-full rounded-xl bg-lime py-4 font-display text-base font-bold text-black transition hover:bg-neon disabled:opacity-50"
           >
             {submitting ? "Redirecting to Wompi…" : `Pay ${formatMoney(spot.nextBid)}`}
@@ -323,6 +380,14 @@ export default function BidModal({ spot, onClose }: Props) {
       </div>
     </div>
   );
+}
+
+/** Convierte la vista previa elegida de vuelta en un archivo para subirlo. */
+async function dataUrlToFile(dataUrl: string, name: string): Promise<File> {
+  const blob = await (await fetch(dataUrl)).blob();
+  const ext = blob.type === "image/svg+xml" ? "svg" : "png";
+  const base = name.replace(/\.[^.]+$/, "") || "logo";
+  return new File([blob], `${base}.${ext}`, { type: blob.type || "image/png" });
 }
 
 const inputCls =

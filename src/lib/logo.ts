@@ -51,6 +51,58 @@ function distance(
   return Math.abs(d[i] - r) + Math.abs(d[i + 1] - g) + Math.abs(d[i + 2] - b);
 }
 
+/**
+ * ¿Vale la pena ofrecer el recorte para esta imagen?
+ *
+ * Devuelve false si el PNG ya trae transparencia o si su borde no es de un
+ * color uniforme. Se comprueba al elegir el archivo, para no mostrar un boton
+ * que no va a poder hacer nada.
+ */
+export async function hasFlatBackground(file: File): Promise<boolean> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close?.();
+
+    const d = ctx.getImageData(0, 0, width, height).data;
+
+    // Cualquier transparencia en el borde: el logo ya viene recortado.
+    const corners = [
+      0,
+      (width - 1) * 4,
+      (height - 1) * width * 4,
+      ((height - 1) * width + width - 1) * 4,
+    ];
+    if (corners.some((i) => d[i + 3] < 250)) return false;
+
+    const [r0, g0, b0] = [d[0], d[1], d[2]];
+    let border = 0;
+    let matching = 0;
+    const check = (x: number, y: number) => {
+      const i = (y * width + x) * 4;
+      border++;
+      if (distance(d, i, r0, g0, b0) < TOLERANCE) matching++;
+    };
+    for (let x = 0; x < width; x++) {
+      check(x, 0);
+      check(x, height - 1);
+    }
+    for (let y = 0; y < height; y++) {
+      check(0, y);
+      check(width - 1, y);
+    }
+    return matching / border >= BORDER_AGREEMENT;
+  } catch {
+    return false;
+  }
+}
+
 export async function removeFlatBackground(file: File): Promise<CleanedLogo> {
   const bitmap = await createImageBitmap(file);
   const { width, height } = bitmap;
