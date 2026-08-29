@@ -28,6 +28,7 @@ export async function GET() {
       })
       .from(spots)
       .leftJoin(brands, eq(spots.currentBrandId, brands.id))
+      .where(eq(spots.isActive, true))
       .orderBy(asc(spots.positionOrder));
 
     if (rows.length === 0) throw new Error("empty");

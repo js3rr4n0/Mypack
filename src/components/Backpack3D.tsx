@@ -114,11 +114,6 @@ function faceTransform(spot: SpotConfig, lift: number) {
         position: [x + lift, y, z] as [number, number, number],
         rotation: [0, Math.PI / 2, 0] as [number, number, number],
       };
-    case "top":
-      return {
-        position: [x, y + lift, z] as [number, number, number],
-        rotation: [-Math.PI / 2, 0, 0] as [number, number, number],
-      };
     default:
       return {
         position: [x, y, z + lift] as [number, number, number],
@@ -283,22 +278,6 @@ function Pack({
         material={softFabric}
       />
 
-      {/* Solapa superior */}
-      <RoundedBox
-        args={[BODY_W * 1.8, BODY_H * 0.2, 0.06]}
-        radius={0.04}
-        smoothness={5}
-        position={[0, 0.6, BODY_D / 2 - 0.02]}
-        castShadow
-        material={fabric}
-      />
-
-      {/* Asa superior */}
-      <mesh position={[0, 0.55, 0]} rotation={[0, 0, 0]} castShadow>
-        <torusGeometry args={[0.085, 0.019, 12, 40, Math.PI]} />
-        <meshStandardMaterial color="#0f0f0f" roughness={0.9} />
-      </mesh>
-
       {/* Tirantes */}
       {[-0.17, 0.17].map((x) => (
         <mesh key={x} position={[x, 0.12, -BODY_D / 2 - 0.05]} rotation={[0.18, 0, 0]} castShadow>
@@ -329,11 +308,11 @@ function Pack({
 
       {/* MOLLE laterales */}
       {[-1, 1].map((side) =>
-        [-0.06, -0.16].map((y) => (
+        [0.19, -0.09, -0.34].map((y) => (
           <Webbing
             key={`${side}-${y}`}
             position={[side * (BODY_W + 0.005), y, 0]}
-            width={0.2}
+            width={0.22}
             rotation={[0, Math.PI / 2, 0]}
           />
         ))
@@ -343,7 +322,7 @@ function Pack({
       <Zipper position={[-BODY_W * 0.92, 0.05, BODY_D / 2 - 0.03]} length={0.62} />
       <Zipper position={[BODY_W * 0.92, 0.05, BODY_D / 2 - 0.03]} length={0.62} />
       <Zipper
-        position={[0, 0.69, BODY_D / 2 - 0.06]}
+        position={[0, 0.46, BODY_D / 2 - 0.02]}
         length={0.5}
         rotation={[0, 0, Math.PI / 2]}
       />

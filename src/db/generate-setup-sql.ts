@@ -6,7 +6,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { SPOTS } from "../lib/spots";
+import { SPOTS, RETIRED_SPOTS } from "../lib/spots";
 
 const drizzleDir = join(process.cwd(), "drizzle");
 
@@ -42,11 +42,17 @@ ON CONFLICT ("name") DO UPDATE SET
   "position_order" = EXCLUDED."position_order",
   "min_bid" = EXCLUDED."min_bid";
 
--- Comprobacion final: deberia devolver 6 filas.
+-- Zonas retiradas: se desactivan en vez de borrarse, porque pueden tener pujas
+-- historicas apuntando a ellas y la llave foranea lo impediria.
+UPDATE "spots" SET "is_active" = false
+WHERE "name" IN (${RETIRED_SPOTS.map(quote).join(", ")});
+
+-- Comprobacion final: deberia devolver ${SPOTS.length} filas activas.
 SELECT "position_order", "name", "display_name", "min_bid", "current_price"
 FROM "spots"
+WHERE "is_active"
 ORDER BY "position_order";
 `;
 
 writeFileSync(join(drizzleDir, "setup.sql"), sql);
-console.log("drizzle/setup.sql generado con", SPOTS.length, "zonas.");
+console.log(`drizzle/setup.sql generado: ${SPOTS.length} zonas activas, ${RETIRED_SPOTS.length} retiradas.`);

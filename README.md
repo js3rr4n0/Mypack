@@ -17,16 +17,33 @@ travel/tech se subastan en vivo: la marca que más paga camina conmigo por la ci
 | Zona | `name` | Precio base |
 |---|---|---|
 | Panel Frontal *(premium)* | `main_front` | $75 |
-| Solapa Superior *(premium)* | `top_flap` | $50 |
 | Bolsillo Frontal | `front_pocket` | $30 |
-| Lateral Izquierdo | `left_side` | $20 |
-| Lateral Derecho | `right_side` | $20 |
-| Zona del Asa | `top_handle` | $12 |
+| Lateral Izquierdo · Superior | `left_top` | $25 |
+| Lateral Izquierdo · Medio | `left_mid` | $20 |
+| Lateral Izquierdo · Inferior | `left_bottom` | $18 |
+| Lateral Derecho · Superior | `right_top` | $25 |
+| Lateral Derecho · Medio | `right_mid` | $20 |
+| Lateral Derecho · Inferior | `right_bottom` | $18 |
+
+Las zonas retiradas (`top_flap`, `top_handle`, `left_side`, `right_side`) se
+desactivan con `is_active = false` en vez de borrarse, para no romper las pujas
+históricas que apunten a ellas.
 
 Los precios se guardan en **centavos enteros de USD** para no arrastrar errores de
 punto flotante. Para tomar una zona ocupada se paga `current_price + $5`. Si una
 marca ya había estado en esa zona y la sacaron, se le acredita lo que pagó y solo
 cubre la diferencia.
+
+## Fotos de la mochila
+
+La sección "Así se vería" usa fotos reales, no una ilustración. Van en
+`public/pack/` como `front.jpg` y `angle.jpg` (ver
+[`public/pack/README.md`](public/pack/README.md)). Si faltan, la página no se
+rompe: muestra un marcador.
+
+Para alinear los logos sobre las fotos, abre la home con `?zonas=1`: se dibujan
+los recuadros de cada zona con su nombre. Los valores están en el campo `photo`
+de cada zona en `src/lib/spots.ts`, en % del tamaño de la foto.
 
 ## Base de datos
 

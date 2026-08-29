@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db, spots } from "./index";
-import { SPOTS } from "../lib/spots";
+import { SPOTS, RETIRED_SPOTS } from "../lib/spots";
 
 async function main() {
   for (const spot of SPOTS) {
@@ -26,7 +26,19 @@ async function main() {
       });
     console.log(`✓ ${spot.name}`);
   }
-  console.log("Listo: 6 zonas sembradas.");
+  // Las zonas retiradas se desactivan, no se borran: pueden tener pujas
+  // historicas apuntando a ellas y el FK lo impediria.
+  if (RETIRED_SPOTS.length) {
+    const { inArray } = await import("drizzle-orm");
+    const removed = await db
+      .update(spots)
+      .set({ isActive: false })
+      .where(inArray(spots.name, RETIRED_SPOTS))
+      .returning({ name: spots.name });
+    for (const r of removed) console.log(`- ${r.name} (retirada)`);
+  }
+
+  console.log(`Listo: ${SPOTS.length} zonas sembradas.`);
 }
 
 main().catch((error) => {

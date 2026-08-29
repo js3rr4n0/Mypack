@@ -151,7 +151,7 @@ export default function Landing() {
 
       {/* Así se vería */}
       <section className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <div>
             <h2 className="font-display text-3xl font-bold sm:text-5xl">
               Así se vería tu logo

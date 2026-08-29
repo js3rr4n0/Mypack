@@ -1,116 +1,130 @@
 "use client";
 
-import { formatMoney } from "@/lib/spots";
+import { useEffect, useState } from "react";
+import { SPOTS, formatMoney, type PhotoView } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 /**
- * Ilustracion semi-realista de la mochila con los logos vigentes pegados.
- * Sirve como fallback si el 3D no carga y como seccion "Asi se veria".
+ * Fotos reales de la mochila con los logos vigentes compuestos encima.
+ *
+ * Los archivos van en public/pack/. Si falta alguno se muestra un marcador en
+ * vez de una imagen rota. Las coordenadas de cada logo viven en el campo
+ * `photo` de src/lib/spots.ts; para ajustarlas visualmente abre la pagina con
+ * ?zonas=1 y se dibujan los recuadros de cada zona sobre la foto.
  */
-export default function PackMockup({ spots }: { spots: SpotView[] }) {
+const PHOTOS: Record<PhotoView, { src: string; alt: string; ratio: string }> = {
+  front: {
+    src: "/pack/front.jpg",
+    alt: "Vista frontal de la mochila",
+    ratio: "2 / 3",
+  },
+  angle: {
+    src: "/pack/angle.jpg",
+    alt: "Vista en ángulo de la mochila",
+    ratio: "2 / 3",
+  },
+};
+
+function PhotoWithLogos({
+  view,
+  spots,
+  debug,
+}: {
+  view: PhotoView;
+  spots: SpotView[];
+  debug: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const photo = PHOTOS[view];
+  const zones = SPOTS.filter((s) => s.photo.view === view);
   const by = Object.fromEntries(spots.map((s) => [s.name, s]));
 
-  const slot = (
-    name: string,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    fallback: string
-  ) => {
-    const brand = by[name]?.brand;
-    return (
-      <foreignObject key={name} x={x} y={y} width={w} height={h}>
-        <div className="flex h-full w-full items-center justify-center rounded-md">
-          {brand?.logo ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={brand.logo}
-              alt={brand.name}
-              className="max-h-full max-w-full object-contain drop-shadow"
-            />
-          ) : (
-            <span className="rounded border border-dashed border-lime/40 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-lime/70">
-              {fallback}
-            </span>
-          )}
+  return (
+    <div
+      className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d]"
+      style={{ aspectRatio: photo.ratio }}
+    >
+      {failed ? (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-center">
+          <span className="text-3xl opacity-30">🎒</span>
+          <p className="text-xs text-white/35">
+            Falta <code className="text-white/50">public{photo.src}</code>
+          </p>
         </div>
-      </foreignObject>
-    );
-  };
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={photo.src}
+          alt={photo.alt}
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
+
+      {!failed &&
+        zones.map((zone) => {
+          const brand = by[zone.name]?.brand;
+          const { x, y, w, h, rotate } = zone.photo;
+
+          if (!brand?.logo && !debug) return null;
+
+          return (
+            <div
+              key={zone.name}
+              className="pointer-events-none absolute flex items-center justify-center"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                width: `${w}%`,
+                height: `${h}%`,
+                transform: `translate(-50%, -50%) rotate(${rotate ?? 0}deg)`,
+              }}
+            >
+              {brand?.logo ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
+                  className="max-h-full max-w-full object-contain"
+                  style={{
+                    /* Sombra sutil para que el logo se asiente en la tela.
+                       Sin mix-blend: con "screen" los logos oscuros desaparecen
+                       sobre el cordura negro. */
+                    filter: "drop-shadow(0 1px 3px rgba(0,0,0,.75))",
+                  }}
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center rounded border border-dashed border-lime/50 bg-lime/5 text-[8px] font-bold uppercase tracking-wider text-lime/80">
+                  {debug ? zone.name : "Tu logo"}
+                </span>
+              )}
+            </div>
+          );
+        })}
+    </div>
+  );
+}
+
+export default function PackMockup({ spots }: { spots: SpotView[] }) {
+  const [debug, setDebug] = useState(false);
+
+  useEffect(() => {
+    setDebug(new URLSearchParams(window.location.search).has("zonas"));
+  }, []);
 
   return (
-    <div className="relative mx-auto w-full max-w-md">
-      <svg viewBox="0 0 300 420" className="w-full drop-shadow-2xl">
-        <defs>
-          <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#1c1c1c" />
-            <stop offset="55%" stopColor="#101010" />
-            <stop offset="100%" stopColor="#050505" />
-          </linearGradient>
-          <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#191919" />
-            <stop offset="100%" stopColor="#0b0b0b" />
-          </linearGradient>
-        </defs>
+    <div className="w-full">
+      <div className="grid grid-cols-2 gap-3">
+        <PhotoWithLogos view="front" spots={spots} debug={debug} />
+        <PhotoWithLogos view="angle" spots={spots} debug={debug} />
+      </div>
 
-        {/* asa */}
-        <path
-          d="M120 34 Q150 6 180 34"
-          fill="none"
-          stroke="#151515"
-          strokeWidth="13"
-          strokeLinecap="round"
-        />
-
-        {/* cuerpo */}
-        <rect x="40" y="30" width="220" height="360" rx="34" fill="url(#body)" />
-
-        {/* solapa superior */}
-        <rect x="56" y="48" width="188" height="54" rx="22" fill="url(#panel)" />
-        <path d="M62 76 H238" stroke="#242424" strokeWidth="2" />
-
-        {/* panel frontal */}
-        <rect x="58" y="112" width="184" height="180" rx="26" fill="url(#panel)" />
-        <rect
-          x="66"
-          y="120"
-          width="168"
-          height="164"
-          rx="22"
-          fill="none"
-          stroke="#202020"
-          strokeWidth="1.5"
-        />
-
-        {/* bolsillo frontal */}
-        <rect x="62" y="298" width="176" height="72" rx="20" fill="#0e0e0e" />
-
-        {/* MOLLE */}
-        {[318, 338, 358].map((y) => (
-          <rect key={y} x="76" y={y} width="148" height="7" rx="3" fill="#080808" />
-        ))}
-        {[104, 150, 196].map((x) => (
-          <rect key={x} x={x} y="314" width="6" height="48" rx="2" fill="#060606" />
-        ))}
-
-        {/* cremalleras */}
-        <path d="M64 120 V284" stroke="#2b2b2b" strokeWidth="3" strokeDasharray="4 3" />
-        <path d="M236 120 V284" stroke="#2b2b2b" strokeWidth="3" strokeDasharray="4 3" />
-
-        {/* banda reflectiva */}
-        <rect x="132" y="378" width="36" height="6" rx="3" fill="#8f8f8f" opacity="0.7" />
-
-        {/* zonas con logos */}
-        {slot("top_flap", 96, 56, 108, 38, "Solapa")}
-        {slot("main_front", 84, 150, 132, 74, "Tu logo aquí")}
-        {slot("front_pocket", 100, 300, 100, 30, "Bolsillo")}
-        {slot("top_handle", 122, 12, 56, 22, "Asa")}
-      </svg>
-
-      <div className="mt-6 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-        {spots.slice(0, 6).map((s) => (
-          <div key={s.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+        {spots.map((s) => (
+          <div
+            key={s.name}
+            className="rounded-lg border border-white/10 bg-white/[0.03] p-2"
+          >
             <p className="truncate text-white/50">{s.displayName}</p>
             <p className="font-semibold text-white">{formatMoney(s.nextBid)}</p>
           </div>
