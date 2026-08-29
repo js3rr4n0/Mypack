@@ -158,7 +158,7 @@ export default function Landing() {
             </h2>
             <p className="mt-5 max-w-md leading-relaxed text-white/55">
               Impreso en alta calidad sobre cordura negro. Sin stickers baratos: parches y
-              vinilo termoadhesivo que aguantan lluvia, transmilenio y cinco kilómetros
+              vinilo termoadhesivo que aguantan lluvia, microbuses y cinco kilómetros
               diarios a pie.
             </p>
             <ul className="mt-7 space-y-3 text-sm text-white/60">

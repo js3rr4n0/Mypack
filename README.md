@@ -1,7 +1,7 @@
 # mypack.lol — My Pack. Your Brand.
 
-Un walking billboard. Seis zonas de una mochila negra tipo travel/tech se subastan
-en vivo: la marca que más paga camina conmigo por la ciudad.
+Un walking billboard en San Salvador. Seis zonas de una mochila negra tipo
+travel/tech se subastan en vivo: la marca que más paga camina conmigo por la ciudad.
 
 ## Stack
 

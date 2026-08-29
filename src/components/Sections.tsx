@@ -24,7 +24,7 @@ export function ImpressionCounter() {
 
   return (
     <span className="tabular-nums text-lime">
-      {new Intl.NumberFormat("es-CO").format(value)}
+      {new Intl.NumberFormat("es-SV").format(value)}
     </span>
   );
 }
@@ -135,7 +135,7 @@ export function FAQ() {
     },
     {
       q: "¿Cómo sé que realmente uso la mochila?",
-      a: "Publico fotos y ubicaciones cada semana en las redes del proyecto. Camino la ciudad todos los días, esa es la razón de ser de esto.",
+      a: "Publico fotos y ubicaciones cada semana en las redes del proyecto. Camino San Salvador todos los días, esa es la razón de ser de esto.",
     },
     {
       q: "¿Cómo se paga?",
@@ -175,7 +175,7 @@ export function Footer() {
     <footer className="border-t border-white/5 px-5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-white/35 sm:flex-row">
         <p className="font-display font-semibold text-white/70">mypack.lol</p>
-        <p>Un walking billboard. Pagos seguros por Wompi.</p>
+        <p>Un walking billboard en San Salvador. Pagos seguros por Wompi.</p>
         <p>© {new Date().getFullYear()}</p>
       </div>
     </footer>

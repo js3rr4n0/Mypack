@@ -8,7 +8,7 @@ export const CURRENCY = "USD";
 export const MIN_INCREMENT = 500; // $5.00
 
 export function formatMoney(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("es-SV", {
     style: "currency",
     currency: CURRENCY,
     maximumFractionDigits: 2,

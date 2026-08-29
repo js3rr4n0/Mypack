@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: "Tu logo camina conmigo todos los días por la ciudad.",
     url: "https://mypack.lol",
     siteName: "mypack.lol",
-    locale: "es_CO",
+    locale: "es_SV",
     type: "website",
   },
   twitter: {
