@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import BidModal from "./BidModal";
-import PackMockup from "./PackMockup";
+import CanvasBoundary from "./CanvasBoundary";
+import Pack360 from "./Pack360";
 import { FAQ, Footer, HowItWorks, ImpressionCounter, Leaderboard } from "./Sections";
 import { SPOTS, formatMoney, type SpotName } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
@@ -131,7 +132,25 @@ export default function Landing() {
 
       {/* Mochila 3D */}
       <section id="mochila" className="mt-10 sm:mt-16">
-        <Backpack3D spots={spots} onSelect={select} />
+        <CanvasBoundary
+          fallback={
+            <div className="flex h-[70vh] min-h-[420px] flex-col items-center justify-center gap-3 px-6 text-center">
+              <span className="text-4xl opacity-25">🎒</span>
+              <p className="max-w-xs text-sm text-white/45">
+                Tu navegador no pudo cargar la mochila en 3D. Más abajo puedes
+                verla en fotos y elegir tu zona igual.
+              </p>
+              <a
+                href="#mochila-360"
+                className="rounded-full border border-white/15 px-5 py-2 text-xs font-semibold transition hover:border-lime hover:text-lime"
+              >
+                Ver en fotos
+              </a>
+            </div>
+          }
+        >
+          <Backpack3D spots={spots} onSelect={select} />
+        </CanvasBoundary>
 
         <div className="mx-auto mt-4 grid max-w-4xl grid-cols-2 gap-2 px-5 sm:grid-cols-3">
           {spots.map((s) => (
@@ -150,7 +169,7 @@ export default function Landing() {
       </section>
 
       {/* Así se vería */}
-      <section className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+      <section id="mochila-360" className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
         <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <div>
             <h2 className="font-display text-3xl font-bold sm:text-5xl">
@@ -174,7 +193,7 @@ export default function Landing() {
               ))}
             </ul>
           </div>
-          <PackMockup spots={spots} />
+          <Pack360 spots={spots} onSelect={select} />
         </div>
       </section>
 

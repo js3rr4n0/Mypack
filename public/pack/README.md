@@ -1,15 +1,34 @@
 # Fotos de la mochila
 
-Pon aquí las dos fotos reales, con estos nombres exactos:
+## Vista 360
 
-- `front.jpg` — vista frontal, la mochila de frente y centrada.
-- `angle.jpg` — vista en ángulo, mostrando un costado con el MOLLE.
+Las fotos de la secuencia van en `public/pack/360/`, numeradas en el orden en
+que gira la mochila:
 
-Recomendado: JPG, lado largo de 1600px, relación 2:3 (vertical), bajo 400KB cada una.
+- `01.jpg` — costado izquierdo
+- `02.jpg` — frente
+- `03.jpg` — costado derecho
 
-Si falta alguna, la web no se rompe: muestra un marcador en su lugar.
+Con tres cuadros el giro es corto pero funciona. Para un 360 real, fotografía la
+mochila sobre una base giratoria cada 15° (24 cuadros) o cada 30° (12 cuadros),
+numéralos `01.jpg`, `02.jpg`, … y agrégalos al arreglo `FRAMES` de
+`src/lib/pack-frames.ts`.
 
-Para alinear los logos sobre las fotos, abre la página con `?zonas=1`: se dibuja
-el recuadro de cada zona con su nombre encima de la foto. Ajusta los valores
-`photo: { x, y, w, h, rotate }` de cada zona en `src/lib/spots.ts` (todo en % del
-tamaño de la foto) hasta que calcen, y quita el parámetro.
+Requisitos para que el giro se vea limpio:
+
+- **Todas las fotos con la misma relación de aspecto** (2:3 vertical) y el mismo
+  encuadre — la mochila debe ocupar el mismo espacio en todas, o "salta" al girar.
+- Mismo fondo, misma luz, mismo lente. Trípode fijo, gira la mochila, no la cámara.
+- JPG, lado largo 1600px, bajo 400KB cada una.
+
+Si falta alguna, la web no se rompe: muestra un marcador diciendo cuál falta.
+
+## Alinear los logos
+
+Cada cuadro declara dónde cae cada zona en esa foto, porque el panel frontal no
+está en el mismo sitio de frente que en tres cuartos.
+
+Abre la home con `?zonas=1`: se dibuja el recuadro de cada zona con su nombre
+encima de la foto. Ajusta los valores `{ x, y, w, h, rotate }` del cuadro
+correspondiente en `src/lib/pack-frames.ts` — todo en % del tamaño de la foto —
+hasta que calcen, y quita el parámetro.

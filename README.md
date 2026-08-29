@@ -34,16 +34,22 @@ punto flotante. Para tomar una zona ocupada se paga `current_price + $5`. Si una
 marca ya había estado en esa zona y la sacaron, se le acredita lo que pagó y solo
 cubre la diferencia.
 
-## Fotos de la mochila
+## Vista 360
 
-La sección "Así se vería" usa fotos reales, no una ilustración. Van en
-`public/pack/` como `front.jpg` y `angle.jpg` (ver
-[`public/pack/README.md`](public/pack/README.md)). Si faltan, la página no se
-rompe: muestra un marcador.
+La sección "Así se vería" es un visor 360 sobre fotos reales: se arrastra con
+mouse o dedo para girar la mochila, y los logos de las marcas se componen sobre
+cada cuadro. Las fotos están en `public/pack/360/` (ver
+[`public/pack/README.md`](public/pack/README.md)); si falta alguna, la página no
+se rompe, muestra un marcador.
 
-Para alinear los logos sobre las fotos, abre la home con `?zonas=1`: se dibujan
-los recuadros de cada zona con su nombre. Los valores están en el campo `photo`
-de cada zona en `src/lib/spots.ts`, en % del tamaño de la foto.
+Cada cuadro declara dónde cae cada zona **en esa foto**, porque el panel frontal
+no está en el mismo sitio de frente que en tres cuartos, y además se ve más
+pequeño cuando está escorzado. La configuración está en
+`src/lib/pack-frames.ts`. Para reajustarla, abre la home con `?zonas=1`: se
+dibujan los recuadros de cada zona con su nombre sobre cada cuadro.
+
+Las tres fotos se normalizaron al mismo encuadre y escala (1200×1800) para que
+la mochila no "salte" al girar.
 
 ## Base de datos
 

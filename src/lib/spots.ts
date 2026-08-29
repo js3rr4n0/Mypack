@@ -10,22 +10,6 @@ export type SpotName =
   | "right_mid"
   | "right_bottom";
 
-/** Foto sobre la que se dibuja el logo en la seccion "Asi se veria". */
-export type PhotoView = "front" | "angle";
-
-export interface PhotoPlacement {
-  view: PhotoView;
-  /** centro del logo, en % del ancho/alto de la foto */
-  x: number;
-  y: number;
-  /** ancho maximo del logo, en % del ancho de la foto */
-  w: number;
-  /** alto maximo del logo, en % del alto de la foto */
-  h: number;
-  /** inclinacion para acompañar la perspectiva de la foto */
-  rotate?: number;
-}
-
 export interface SpotConfig {
   name: SpotName;
   displayName: string;
@@ -40,7 +24,6 @@ export interface SpotConfig {
   face: "front" | "left" | "right";
   /** tamano del logo sobre la superficie (ancho, alto) en metros */
   size: [number, number];
-  photo: PhotoPlacement;
 }
 
 export const SPOTS: SpotConfig[] = [
@@ -55,7 +38,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [0, 0.16, 0.19],
     face: "front",
     size: [0.24, 0.14],
-    photo: { view: "front", x: 50, y: 45, w: 30, h: 12 },
   },
   {
     name: "front_pocket",
@@ -67,7 +49,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [0, -0.16, 0.2],
     face: "front",
     size: [0.16, 0.08],
-    photo: { view: "front", x: 50, y: 66, w: 22, h: 8 },
   },
 
   // --- Lateral izquierdo (tres franjas) ---
@@ -81,7 +62,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [-0.325, 0.3, 0],
     face: "left",
     size: [0.15, 0.1],
-    photo: { view: "angle", x: 33, y: 33, w: 15, h: 7, rotate: -6 },
   },
   {
     name: "left_mid",
@@ -93,7 +73,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [-0.325, 0.03, 0],
     face: "left",
     size: [0.15, 0.1],
-    photo: { view: "angle", x: 32, y: 46, w: 15, h: 7, rotate: -6 },
   },
   {
     name: "left_bottom",
@@ -105,7 +84,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [-0.325, -0.25, 0],
     face: "left",
     size: [0.15, 0.09],
-    photo: { view: "angle", x: 35, y: 62, w: 15, h: 7, rotate: -6 },
   },
 
   // --- Lateral derecho (tres franjas) ---
@@ -119,7 +97,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [0.325, 0.3, 0],
     face: "right",
     size: [0.15, 0.1],
-    photo: { view: "angle", x: 67, y: 33, w: 15, h: 7, rotate: 6 },
   },
   {
     name: "right_mid",
@@ -131,7 +108,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [0.325, 0.03, 0],
     face: "right",
     size: [0.15, 0.1],
-    photo: { view: "angle", x: 68, y: 46, w: 15, h: 7, rotate: 6 },
   },
   {
     name: "right_bottom",
@@ -143,7 +119,6 @@ export const SPOTS: SpotConfig[] = [
     hotspot: [0.325, -0.25, 0],
     face: "right",
     size: [0.15, 0.09],
-    photo: { view: "angle", x: 65, y: 62, w: 15, h: 7, rotate: 6 },
   },
 ];
 

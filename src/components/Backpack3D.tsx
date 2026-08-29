@@ -6,6 +6,7 @@ import {
   ContactShadows,
   Environment,
   Html,
+  Lightformer,
   OrbitControls,
   RoundedBox,
 } from "@react-three/drei";
@@ -396,7 +397,19 @@ export default function Backpack3D({
             onSelect={onSelect}
             autoRotate={!interacting && !hovered}
           />
-          <Environment preset="city" />
+          {/* Iluminacion construida en el cliente. `preset` descargaria un HDR
+              de un CDN externo, y si esa peticion falla la escena lanza y tumba
+              la pagina entera. */}
+          <Environment resolution={128}>
+            <Lightformer intensity={2.2} position={[0, 3, 2]} scale={[6, 3, 1]} />
+            <Lightformer intensity={1.1} position={[-3, 1, 1]} scale={[3, 4, 1]} />
+            <Lightformer
+              intensity={0.8}
+              color="#c6f432"
+              position={[3, 0, -2]}
+              scale={[3, 3, 1]}
+            />
+          </Environment>
         </Suspense>
 
         <ContactShadows
