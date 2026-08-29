@@ -1,5 +1,5 @@
 import { and, eq, ne } from "drizzle-orm";
-import { db, spots, bids, brands } from "@/db";
+import { db, spots, bids } from "@/db";
 import { findTransactionByReference, type PaymentStatus } from "@/lib/wompi";
 
 /**
@@ -113,22 +113,19 @@ export async function reconcileBid(reference: string): Promise<SettleResult> {
       bidId: bids.id,
       status: bids.status,
       createdAt: bids.createdAt,
-      email: brands.email,
     })
     .from(bids)
-    .leftJoin(brands, eq(bids.brandId, brands.id))
     .where(eq(bids.wompiReference, reference))
     .limit(1);
 
   if (!row) return { outcome: "unknown_reference" };
   if (row.status !== "pending") return { outcome: "already_processed" };
-  if (!row.email) return { outcome: "pending" };
 
   const since = row.createdAt
     ? new Date(row.createdAt.getTime() - 86_400_000)
     : new Date(Date.now() - 7 * 86_400_000);
 
-  const tx = await findTransactionByReference(reference, row.email, since);
+  const tx = await findTransactionByReference(reference, since);
   if (!tx) return { outcome: "pending" };
 
   const allowTest = process.env.WOMPI_ALLOW_TEST_TRANSACTIONS === "true";

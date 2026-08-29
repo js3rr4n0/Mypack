@@ -192,32 +192,44 @@ async function getPaymentLink(
  */
 export async function findTransactionByReference(
   reference: string,
-  customerEmail: string,
   since: Date
 ): Promise<WompiTransaction | null> {
-  const params = new URLSearchParams({
-    emailCliente: customerEmail,
-    fechaInicio: since.toISOString().slice(0, 10),
-    fechaFin: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10),
-    cantidadPorPagina: "50",
-  });
+  const day = (d: Date) => d.toISOString().slice(0, 10);
+  const PER_PAGE = 100;
+  const MAX_PAGES = 10;
 
-  try {
-    const page = await api<{ resultado?: WompiTransaction[] }>(
-      `/TransaccionCompra?${params.toString()}`
+  // Deliberadamente NO se filtra por emailCliente: el correo que Wompi guarda en
+  // la transaccion es el del checkout o el de la tarjeta, y no tiene por que
+  // coincidir con el que la marca escribio en nuestro formulario. Filtrar por el
+  // hacia que la busqueda no encontrara nada y fallara en silencio.
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const params = new URLSearchParams({
+      fechaInicio: day(since),
+      fechaFin: day(new Date(Date.now() + 86_400_000)),
+      cantidadPorPagina: String(PER_PAGE),
+      paginaActual: String(page),
+    });
+
+    let body: { resultado?: WompiTransaction[]; totalPaginas?: number };
+    try {
+      body = await api(`/TransaccionCompra?${params.toString()}`);
+    } catch (error) {
+      console.error("[wompi] no se pudo buscar la transaccion", error);
+      return null;
+    }
+
+    const rows = body?.resultado ?? [];
+    const match = rows.find(
+      (t) =>
+        t.idExterno === reference || t.identificadorEnlaceComercio === reference
     );
-    const rows = page?.resultado ?? [];
-    return (
-      rows.find(
-        (t) =>
-          t.idExterno === reference ||
-          t.identificadorEnlaceComercio === reference
-      ) ?? null
-    );
-  } catch (error) {
-    console.error("[wompi] no se pudo buscar la transaccion", error);
-    return null;
+    if (match) return match;
+
+    if (rows.length < PER_PAGE) break;
+    if (body?.totalPaginas && page >= body.totalPaginas) break;
   }
+
+  return null;
 }
 
 export type PaymentStatus = "approved" | "declined" | "pending";
