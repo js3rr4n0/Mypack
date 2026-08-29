@@ -51,6 +51,23 @@ export const bids = pgTable("bids", {
   wompiTransactionId: varchar("wompi_transaction_id", { length: 100 }),
   wompiReference: varchar("wompi_reference", { length: 100 }).unique(),
   status: varchar("status", { length: 20 }).default("pending"),
+  // Se marca cuando el pago se aprobo pero la zona ya se la habia llevado otra
+  // marca a un precio mayor: hay que devolver el dinero.
+  needsRefund: boolean("needs_refund").default(false),
+  // Como se confirmo el pago: "webhook" o "reconcile" (consulta a la API).
+  settledVia: varchar("settled_via", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/**
+ * Registro de todo lo que llega al webhook, incluso lo que se rechaza.
+ * Sin esto no hay forma de saber si Wompi llamo y con que cuerpo.
+ */
+export const webhookEvents = pgTable("webhook_events", {
+  id: serial("id").primaryKey(),
+  body: text("body"),
+  outcome: varchar("outcome", { length: 40 }),
+  reference: varchar("reference", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -86,3 +103,4 @@ export type Spot = typeof spots.$inferSelect;
 export type Brand = typeof brands.$inferSelect;
 export type Bid = typeof bids.$inferSelect;
 export type Visit = typeof visits.$inferSelect;
+export type WebhookEvent = typeof webhookEvents.$inferSelect;

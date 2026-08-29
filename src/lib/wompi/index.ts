@@ -150,6 +150,7 @@ export async function startCheckout(
 
 export interface WompiTransaction {
   idTransaccion: string;
+  idExterno?: string;
   esAprobada: boolean;
   esReal: boolean;
   monto: number;
@@ -180,6 +181,41 @@ async function getPaymentLink(
   try {
     return await api(`/EnlacePago/${encodeURIComponent(String(idEnlace))}`);
   } catch {
+    return null;
+  }
+}
+
+/**
+ * GET /TransaccionCompra — busca la transaccion de una referencia sin depender
+ * del webhook. Wompi copia `identificadorEnlaceComercio` en el `idExterno` de
+ * la transaccion, asi que se filtra por email y fecha y se compara ese campo.
+ */
+export async function findTransactionByReference(
+  reference: string,
+  customerEmail: string,
+  since: Date
+): Promise<WompiTransaction | null> {
+  const params = new URLSearchParams({
+    emailCliente: customerEmail,
+    fechaInicio: since.toISOString().slice(0, 10),
+    fechaFin: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10),
+    cantidadPorPagina: "50",
+  });
+
+  try {
+    const page = await api<{ resultado?: WompiTransaction[] }>(
+      `/TransaccionCompra?${params.toString()}`
+    );
+    const rows = page?.resultado ?? [];
+    return (
+      rows.find(
+        (t) =>
+          t.idExterno === reference ||
+          t.identificadorEnlaceComercio === reference
+      ) ?? null
+    );
+  } catch (error) {
+    console.error("[wompi] no se pudo buscar la transaccion", error);
     return null;
   }
 }

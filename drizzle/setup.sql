@@ -67,6 +67,17 @@ CREATE TABLE IF NOT EXISTS "visits" (
 	CONSTRAINT "visits_visitor_hash_unique" UNIQUE("visitor_hash")
 );
 
+CREATE TABLE IF NOT EXISTS "webhook_events" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"body" text,
+	"outcome" varchar(40),
+	"reference" varchar(100),
+	"created_at" timestamp DEFAULT now()
+);
+
+ALTER TABLE "bids" ADD COLUMN "needs_refund" boolean DEFAULT false;
+ALTER TABLE "bids" ADD COLUMN "settled_via" varchar(20);
+
 -- Las 6 zonas de la mochila. min_bid va en centavos de USD.
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES

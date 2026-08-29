@@ -130,6 +130,39 @@ OAuth 2.0 *client credentials* contra `https://id.wompi.sv/connect/token` con
 `grant_type=client_credentials`, `audience=wompi_api`, `client_id` = App ID y
 `client_secret` = API Secret. El token dura una hora y se cachea en memoria.
 
+### Si el webhook no llega
+
+El webhook es best-effort: puede perderse, la URL puede cambiar, el proveedor
+puede no reintentar. Por eso **no es el único camino**. Cuando `/thanks` consulta
+`GET /api/bids/status?ref=…` y la puja sigue pendiente, el servidor le pregunta
+directamente a Wompi (`GET /TransaccionCompra` filtrado por email y fecha,
+buscando la referencia en `idExterno`) y la liquida ahí mismo. Un pago cobrado
+termina publicándose aunque el webhook nunca aparezca.
+
+Ambos caminos usan la misma función `settleBid()` en `src/lib/settle.ts`, para
+que no existan dos reglas distintas para cambiar el dueño de una zona.
+
+Todo lo que entra al webhook queda registrado en la tabla `webhook_events`,
+incluido lo rechazado. Sin ese rastro no hay forma de saber si Wompi llamó.
+
+### Dos personas comprando la misma zona
+
+Cuando alguien empieza a pagar, la zona queda **reservada 20 minutos**: otra
+persona que lo intente recibe un 409 y un mensaje claro, en vez de pagar por algo
+que no va a recibir. La reserva expira sola, así que un carrito abandonado no
+bloquea la zona.
+
+Si aun así dos pagos se cruzan, `settleBid()` compara el precio que la puja
+buscaba alcanzar contra el precio actual de la zona. El que llega tarde se marca
+con `needs_refund = true` y la página se lo dice al cliente. Hay que devolverle
+el dinero desde el panel de Wompi:
+
+```sql
+SELECT b.wompi_reference, b.wompi_transaction_id, b.amount, br.email, br.name
+FROM bids b JOIN brands br ON br.id = b.brand_id
+WHERE b.needs_refund;
+```
+
 ### Seguridad del webhook
 
 Wompi **no firma** sus notificaciones, así que se usan dos defensas:
@@ -149,7 +182,7 @@ Wompi **no firma** sus notificaciones, así que se usan dos defensas:
 | `POST /api/bids` | Inicia una puja y devuelve el checkout de Wompi |
 | `GET /api/bids/status?ref=` | Estado de una puja |
 | `POST /api/upload` | Sube el logo (Blob o base64), máx 5MB, PNG/SVG |
-| `POST /api/webhook/wompi` | Webhook `transaction.updated` |
+| `POST /api/webhook/wompi` | Notificación de Wompi |
 
 ## Despliegue en Vercel
 

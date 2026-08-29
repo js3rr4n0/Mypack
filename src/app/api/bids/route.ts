@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gt, ne } from "drizzle-orm";
 import { db, spots, brands, bids } from "@/db";
 import { nextBidAmount, formatMoney } from "@/lib/spots";
 import { newReference, startCheckout } from "@/lib/wompi";
@@ -8,6 +8,15 @@ import { siteUrl } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Cuanto tiempo queda reservada una zona mientras alguien la paga.
+ *
+ * Sin esto, dos personas pueden pagar la misma zona al mismo precio: a las dos
+ * se les cobra y solo una se queda con el espacio. La reserva expira sola, para
+ * que un carrito abandonado no bloquee la zona para siempre.
+ */
+const RESERVATION_MINUTES = 20;
 
 function clean(value: unknown, max: number): string | null {
   if (typeof value !== "string") return null;
@@ -54,6 +63,32 @@ export async function POST(req: Request) {
     const [spot] = await db.select().from(spots).where(eq(spots.name, spotName)).limit(1);
     if (!spot || !spot.isActive)
       return NextResponse.json({ error: "Spot unavailable" }, { status: 404 });
+
+    // ¿Hay alguien pagando esta zona ahora mismo?
+    const since = new Date(Date.now() - RESERVATION_MINUTES * 60_000);
+    const [held] = await db
+      .select({ id: bids.id, email: brands.email })
+      .from(bids)
+      .leftJoin(brands, eq(bids.brandId, brands.id))
+      .where(
+        and(
+          eq(bids.spotId, spot.id),
+          eq(bids.status, "pending"),
+          gt(bids.createdAt, since)
+        )
+      )
+      .orderBy(desc(bids.createdAt))
+      .limit(1);
+
+    if (held && held.email !== email) {
+      return NextResponse.json(
+        {
+          error:
+            "Someone is paying for this spot right now. Try again in a few minutes, or pick another spot.",
+        },
+        { status: 409 }
+      );
+    }
 
     const target = nextBidAmount(spot.currentPrice, spot.minBid);
 
