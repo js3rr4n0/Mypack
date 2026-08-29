@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { formatMoney, MIN_INCREMENT } from "@/lib/spots";
+import { removeFlatBackground, DARK_LOGO_THRESHOLD } from "@/lib/logo";
 import type { SpotView } from "@/lib/types";
 
 interface Props {
@@ -21,6 +22,10 @@ export default function BidModal({ spot, onClose }: Props) {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [rawFile, setRawFile] = useState<File | null>(null);
+  const [cutout, setCutout] = useState(true);
+  const [hadBackground, setHadBackground] = useState(false);
+  const [tooDark, setTooDark] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,16 +46,38 @@ export default function BidModal({ spot, onClose }: Props) {
 
   const preview = uploaded ?? logoBase64 ?? (logoUrl.trim() || null);
 
-  async function handleFile(file: File) {
+  async function handleFile(file: File, removeBg = cutout) {
     setError(null);
     if (file.size > MAX_BYTES) {
       setError("The logo must be under 5MB.");
       return;
     }
+    setRawFile(file);
     setUploading(true);
     try {
+      let toUpload: File = file;
+
+      // Los SVG ya son vectoriales y suelen venir con fondo transparente.
+      if (removeBg && file.type !== "image/svg+xml") {
+        try {
+          const cleaned = await removeFlatBackground(file);
+          setHadBackground(cleaned.removed);
+          setTooDark(cleaned.luminance < DARK_LOGO_THRESHOLD);
+          if (cleaned.removed) {
+            const blob = await (await fetch(cleaned.dataUrl)).blob();
+            toUpload = new File([blob], file.name.replace(/\.[^.]+$/, "") + ".png", {
+              type: "image/png",
+            });
+          }
+        } catch {
+          /* si el recorte falla se sube el original */
+        }
+      } else if (file.type !== "image/svg+xml") {
+        setHadBackground(false);
+      }
+
       const form = new FormData();
-      form.append("file", file);
+      form.append("file", toUpload);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Could not upload the logo");
@@ -192,10 +219,47 @@ export default function BidModal({ spot, onClose }: Props) {
               placeholder="…or paste the logo URL"
             />
             {preview && (
-              <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="Preview" className="h-10 w-auto object-contain" />
-                <span className="text-xs text-white/40">Preview</span>
+              <div className="mt-3 space-y-2">
+                {/* Vista previa sobre negro: es donde va a vivir el logo. */}
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-black p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="h-12 w-auto max-w-[60%] object-contain"
+                  />
+                  <span className="text-xs text-white/35">
+                    How it will look on the pack
+                  </span>
+                </div>
+
+                {tooDark && (
+                  <p className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200/90">
+                    Heads up: this logo is very dark, and the pack is black. It
+                    will be hard to see. A white or light version reads much
+                    better on the fabric.
+                  </p>
+                )}
+
+                {hadBackground && (
+                  <label className="flex cursor-pointer items-start gap-2 text-xs text-white/50">
+                    <input
+                      type="checkbox"
+                      checked={cutout}
+                      disabled={uploading}
+                      onChange={(e) => {
+                        setCutout(e.target.checked);
+                        if (rawFile) handleFile(rawFile, e.target.checked);
+                      }}
+                      className="mt-0.5 accent-lime"
+                    />
+                    <span>
+                      Background removed. Your logo had a flat backdrop — without
+                      it, it sits on the fabric instead of looking like a sticker.
+                      Uncheck to keep the original.
+                    </span>
+                  </label>
+                )}
               </div>
             )}
           </div>
