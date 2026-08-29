@@ -15,7 +15,10 @@ const migration = readdirSync(drizzleDir)
   .sort()
   .map((f) => readFileSync(join(drizzleDir, f), "utf8"))
   .join("\n")
-  .replaceAll("--> statement-breakpoint", "");
+  .replaceAll("--> statement-breakpoint", "")
+  // drizzle-kit emite ALTER TABLE ... ADD COLUMN sin guarda, que revienta en la
+  // segunda corrida. setup.sql tiene que poder pegarse las veces que haga falta.
+  .replace(/ADD COLUMN "/g, 'ADD COLUMN IF NOT EXISTS "');
 
 const quote = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
