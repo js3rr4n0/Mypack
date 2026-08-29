@@ -7,6 +7,7 @@ interface Status {
   status: string;
   amount: number;
   spot: string | null;
+  needsRefund?: boolean | null;
 }
 
 function Result() {
@@ -31,7 +32,7 @@ function Result() {
     };
   }, [ref]);
 
-  const status = data?.status ?? "pending";
+  const status = data?.needsRefund ? "refund" : (data?.status ?? "pending");
   const copy: Record<string, { title: string; body: string }> = {
     approved: {
       title: "Your logo is walking with me!",
@@ -45,6 +46,10 @@ function Result() {
       title: "The payment was declined",
       body: "Nothing was charged. You can try again from the home page.",
     },
+    refund: {
+      title: "Someone outbid you while you were paying",
+      body: "Another brand took this spot first, so your payment is being refunded in full. I'll email you — sorry about that.",
+    },
   };
 
   const c = copy[status] ?? copy.pending;
@@ -57,7 +62,9 @@ function Result() {
             ? "bg-lime"
             : status === "declined"
               ? "bg-red-500/70"
-              : "animate-pulse bg-white/20"
+              : status === "refund"
+                ? "bg-amber-400/70"
+                : "animate-pulse bg-white/20"
         }`}
       />
       <h1 className="font-display text-3xl font-bold sm:text-4xl">{c.title}</h1>

@@ -1,0 +1,1 @@
+ALTER TABLE "bids" ADD COLUMN "wompi_link_id" varchar(50);

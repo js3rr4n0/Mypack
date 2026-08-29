@@ -150,6 +150,7 @@ export async function startCheckout(
 
 export interface WompiTransaction {
   idTransaccion: string;
+  idExterno?: string;
   esAprobada: boolean;
   esReal: boolean;
   monto: number;
@@ -174,12 +175,38 @@ export async function getTransaction(
 }
 
 /** GET /EnlacePago/{id} — para recuperar la referencia del comercio. */
-async function getPaymentLink(
-  idEnlace: number | string
-): Promise<{ identificadorEnlaceComercio?: string } | null> {
+
+
+/**
+ * GET /TransaccionCompra — busca la transaccion de una referencia sin depender
+ * del webhook. Wompi copia `identificadorEnlaceComercio` en el `idExterno` de
+ * la transaccion, asi que se filtra por email y fecha y se compara ese campo.
+ */
+export interface PaymentLinkDetail {
+  nombreEnlace?: string;
+  monto?: number;
+  usable?: boolean;
+  transaccionCompra?: WompiTransaction | null;
+}
+
+/**
+ * GET /EnlacePago/{id} — el enlace trae adjunta su transaccion.
+ *
+ * Es la unica forma fiable de ligar un cobro con una puja: el `idExterno` de la
+ * transaccion viene NULL para los pagos hechos por enlace, asi que buscar por
+ * referencia en /TransaccionCompra no encuentra nada. El enlace, en cambio,
+ * guarda nuestra referencia en `nombreEnlace` y la transaccion en
+ * `transaccionCompra`.
+ */
+export async function getPaymentLinkDetail(
+  linkId: number | string
+): Promise<PaymentLinkDetail | null> {
   try {
-    return await api(`/EnlacePago/${encodeURIComponent(String(idEnlace))}`);
-  } catch {
+    return await api<PaymentLinkDetail>(
+      `/EnlacePago/${encodeURIComponent(String(linkId))}`
+    );
+  } catch (error) {
+    console.error("[wompi] no se pudo leer el enlace de pago", error);
     return null;
   }
 }
@@ -233,8 +260,8 @@ export async function resolveEvent(
       | string
       | undefined;
     if (idEnlace !== undefined) {
-      const link = await getPaymentLink(idEnlace);
-      reference = link?.identificadorEnlaceComercio ?? null;
+      const link = await getPaymentLinkDetail(idEnlace);
+      reference = link?.nombreEnlace ?? null;
     }
   }
 

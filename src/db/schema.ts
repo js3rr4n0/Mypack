@@ -49,8 +49,39 @@ export const bids = pgTable("bids", {
   previousPrice: integer("previous_price"),
   isOutbid: boolean("is_outbid").default(false),
   wompiTransactionId: varchar("wompi_transaction_id", { length: 100 }),
+  // Id del Enlace de Pago. Es lo unico que liga un cobro con esta puja: la
+  // transaccion de Wompi trae idExterno en NULL para pagos por enlace.
+  wompiLinkId: varchar("wompi_link_id", { length: 50 }),
   wompiReference: varchar("wompi_reference", { length: 100 }).unique(),
   status: varchar("status", { length: 20 }).default("pending"),
+  // Se marca cuando el pago se aprobo pero la zona ya se la habia llevado otra
+  // marca a un precio mayor: hay que devolver el dinero.
+  needsRefund: boolean("needs_refund").default(false),
+  // Como se confirmo el pago: "webhook" o "reconcile" (consulta a la API).
+  settledVia: varchar("settled_via", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/**
+ * Registro de todo lo que llega al webhook, incluso lo que se rechaza.
+ * Sin esto no hay forma de saber si Wompi llamo y con que cuerpo.
+ */
+export const webhookEvents = pgTable("webhook_events", {
+  id: serial("id").primaryKey(),
+  body: text("body"),
+  outcome: varchar("outcome", { length: 40 }),
+  reference: varchar("reference", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/**
+ * Visitas al sitio. Una fila por visitante y por dia: `visitorHash` es
+ * SHA-256(ip + user-agent + fecha + salt), asi que no se guarda ninguna IP ni
+ * nada que identifique a la persona, y recargar la pagina no infla el numero.
+ */
+export const visits = pgTable("visits", {
+  id: serial("id").primaryKey(),
+  visitorHash: varchar("visitor_hash", { length: 64 }).notNull().unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -74,3 +105,5 @@ export const bidsRelations = relations(bids, ({ one }) => ({
 export type Spot = typeof spots.$inferSelect;
 export type Brand = typeof brands.$inferSelect;
 export type Bid = typeof bids.$inferSelect;
+export type Visit = typeof visits.$inferSelect;
+export type WebhookEvent = typeof webhookEvents.$inferSelect;

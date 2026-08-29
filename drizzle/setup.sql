@@ -60,6 +60,149 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
+CREATE TABLE IF NOT EXISTS "visits" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"visitor_hash" varchar(64) NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	CONSTRAINT "visits_visitor_hash_unique" UNIQUE("visitor_hash")
+);
+
+CREATE TABLE IF NOT EXISTS "webhook_events" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"body" text,
+	"outcome" varchar(40),
+	"reference" varchar(100),
+	"created_at" timestamp DEFAULT now()
+);
+
+ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "needs_refund" boolean DEFAULT false;
+ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "settled_via" varchar(20);
+ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "wompi_link_id" varchar(50);
+-- Liquidación manual de una puja pagada.
+--
+-- Úsalo SOLO si tienes el correo de Wompi confirmando el cobro y la página
+-- /thanks?ref=… sigue diciendo "Confirming your payment" — es decir, cuando
+-- ni el webhook ni la reconciliación automática lograron cerrarla.
+--
+-- Reemplaza la referencia en los TRES lugares donde aparece abajo por la tuya
+-- y corre todo junto en el SQL Editor de Neon.
+--
+-- (Antes usaba \set, que solo funciona en la terminal psql, no en Neon.)
+
+-- 1. Mirar qué hay antes de tocar nada.
+SELECT b.id, b.status, b.amount, b.previous_price, b.needs_refund,
+       s.name AS spot, s.current_price, br.name AS brand, br.email,
+       (br.logo_url IS NOT NULL OR br.logo_base64 IS NOT NULL) AS tiene_logo
+FROM bids b
+JOIN spots s  ON s.id  = b.spot_id
+JOIN brands br ON br.id = b.brand_id
+WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA';
+
+-- 2. Liquidar: marca las pujas anteriores de esa zona como superadas,
+--    aprueba esta, y le entrega la zona a la marca.
+WITH target AS (
+  SELECT b.id, b.spot_id, b.brand_id,
+         (COALESCE(b.previous_price, 0) + b.amount) AS new_price
+  FROM bids b
+  WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA' AND b.status = 'pending'
+),
+outbid AS (
+  UPDATE bids SET is_outbid = true
+  WHERE spot_id = (SELECT spot_id FROM target)
+    AND status = 'approved'
+    AND id <> (SELECT id FROM target)
+  RETURNING 1
+),
+approve AS (
+  UPDATE bids
+  SET status = 'approved', is_outbid = false, settled_via = 'manual'
+  WHERE id = (SELECT id FROM target)
+  RETURNING 1
+)
+UPDATE spots s
+SET current_brand_id = (SELECT brand_id FROM target),
+    current_price    = (SELECT new_price FROM target)
+WHERE s.id = (SELECT spot_id FROM target);
+
+-- 3. Comprobar que quedó publicada.
+SELECT s.name, br.name AS brand, s.current_price, b.status, b.settled_via
+FROM spots s
+JOIN brands br ON br.id = s.current_brand_id
+JOIN bids b    ON b.wompi_reference = 'PON-AQUI-TU-REFERENCIA'
+WHERE s.id = b.spot_id;
+
+-- Revisión del estado de mypack.lol. Solo lee, no cambia nada.
+-- Compatible con el SQL Editor de Neon: pégalo completo y dale Run.
+-- Devuelve seis tablas, una por bloque.
+
+-- 1. ZONAS: quién ocupa qué y si tiene logo cargado.
+SELECT '1. ZONAS' AS bloque,
+       s.position_order AS n,
+       s.display_name,
+       COALESCE(br.name, '-- libre --')      AS marca,
+       (s.current_price / 100.0)::money      AS precio_actual,
+       (s.min_bid / 100.0)::money            AS precio_base,
+       CASE
+         WHEN br.id IS NULL              THEN ''
+         WHEN br.logo_url    IS NOT NULL THEN 'logo por URL'
+         WHEN br.logo_base64 IS NOT NULL THEN 'logo en base64'
+         ELSE 'SIN LOGO (revisar)'
+       END AS logo
+FROM spots s
+LEFT JOIN brands br ON br.id = s.current_brand_id
+WHERE s.is_active
+ORDER BY s.position_order;
+
+-- 2. PAGOS: los últimos 10 y cómo se cerró cada uno.
+SELECT '2. PAGOS' AS bloque,
+       b.created_at::timestamp(0)   AS fecha,
+       s.name                       AS zona,
+       br.name                      AS marca,
+       (b.amount / 100.0)::money    AS pagado,
+       b.status,
+       COALESCE(b.settled_via, '-') AS cerrado_por,
+       b.needs_refund               AS devolver,
+       b.wompi_reference
+FROM bids b
+JOIN spots s   ON s.id  = b.spot_id
+JOIN brands br ON br.id = b.brand_id
+ORDER BY b.id DESC
+LIMIT 10;
+
+-- 3. PENDIENTES de más de 30 minutos. Debería salir vacío.
+SELECT '3. PENDIENTES' AS bloque,
+       b.wompi_reference,
+       br.email,
+       (b.amount / 100.0)::money  AS monto,
+       b.created_at::timestamp(0) AS desde
+FROM bids b
+JOIN brands br ON br.id = b.brand_id
+WHERE b.status = 'pending'
+  AND b.created_at < now() - interval '30 minutes';
+
+-- 4. DEVOLUCIONES pendientes. Debería salir vacío.
+SELECT '4. DEVOLUCIONES' AS bloque,
+       b.wompi_reference,
+       b.wompi_transaction_id,
+       (b.amount / 100.0)::money AS monto,
+       br.email,
+       br.name
+FROM bids b
+JOIN brands br ON br.id = b.brand_id
+WHERE b.needs_refund;
+
+-- 5. WEBHOOK: ¿Wompi ha llamado alguna vez?
+SELECT '5. WEBHOOK' AS bloque,
+       created_at::timestamp(0) AS fecha,
+       outcome,
+       reference
+FROM webhook_events
+ORDER BY id DESC
+LIMIT 5;
+
+-- 6. VISITAS al sitio.
+SELECT '6. VISITAS' AS bloque, count(*) AS total FROM visits;
+
 -- Las 6 zonas de la mochila. min_bid va en centavos de USD.
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES

@@ -158,7 +158,7 @@ export default function Pack360({
                   top: `${zone.y}%`,
                   width: `${zone.w}%`,
                   height: `${zone.h}%`,
-                  transform: `translate(-50%, -50%) rotate(${zone.rotate ?? 0}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${zone.rotate ?? 0}deg) skewY(${zone.skew ?? 0}deg)`,
                   opacity: zone.opacity ?? 1,
                   transition: "opacity 420ms cubic-bezier(.4,0,.2,1)",
                 }}
@@ -169,8 +169,19 @@ export default function Pack360({
                     src={brand.logo}
                     alt={brand.name}
                     draggable={false}
-                    className="max-h-full max-w-full object-contain"
-                    style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,.75))" }}
+                    className="max-h-full max-w-full rounded-[4px] object-contain"
+                    style={{
+                      /* El logo tiene que parecer un parche cosido a la tela, no
+                         una imagen pegada encima:
+                         - drop-shadow respeta el alfa (box-shadow dibujaria una
+                           caja tambien en los PNG transparentes);
+                         - el redondeo convierte un logo con fondo opaco en una
+                           etiqueta, y es invisible si el fondo es transparente;
+                         - brightness/contrast/saturate lo bajan a la luz de la
+                           foto, que es de estudio y apagada. */
+                      filter:
+                        "drop-shadow(0 1px 2px rgba(0,0,0,.55)) brightness(.9) contrast(1.06) saturate(.92)",
+                    }}
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center rounded border border-dashed border-lime/50 bg-lime/5 text-[8px] font-bold uppercase tracking-wider text-lime/80">

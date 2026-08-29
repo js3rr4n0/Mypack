@@ -8,6 +8,27 @@
       "when": 1788019834801,
       "tag": "0000_redundant_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788024420116,
+      "tag": "0001_visits",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788025396813,
+      "tag": "0002_settlement",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788026660924,
+      "tag": "0003_link_id",
+      "breakpoints": true
     }
   ]
 }

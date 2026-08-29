@@ -2,30 +2,57 @@
 
 import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/spots";
+import { instagramUrl, prettyDomain, safeUrl, twitterUrl } from "@/lib/links";
 import type { SpotView } from "@/lib/types";
 
-/** ~4,200 impressions a day walking the city. */
-const DAILY_IMPRESSIONS = 4200;
-const START = new Date("2026-01-01T00:00:00Z").getTime();
-
-export function ImpressionCounter() {
-  const [value, setValue] = useState(0);
+/**
+ * Visitas reales al sitio, contadas contra la base de datos.
+ *
+ * Registra la visita una sola vez por sesion del navegador y muestra el total.
+ * Si la consulta falla no se muestra nada: antes este contador mostraba una
+ * estimacion inventada, y un numero falso en la pagina es peor que ninguno.
+ */
+export function VisitCounter() {
+  const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
-    const compute = () => {
-      const days = Math.max((Date.now() - START) / 86_400_000, 1);
-      const perMs = (DAILY_IMPRESSIONS / 86_400_000) * 1000;
-      setValue(Math.floor(days * DAILY_IMPRESSIONS + (Date.now() % 1000) * perMs));
+    let alive = true;
+
+    const already = (() => {
+      try {
+        return sessionStorage.getItem("mypack:counted") === "1";
+      } catch {
+        return false;
+      }
+    })();
+
+    fetch("/api/visit", { method: already ? "GET" : "POST" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!alive || typeof json?.total !== "number") return;
+        setTotal(json.total);
+        try {
+          sessionStorage.setItem("mypack:counted", "1");
+        } catch {
+          /* modo privado: se cuenta de nuevo, no pasa nada */
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
     };
-    compute();
-    const id = setInterval(compute, 1200);
-    return () => clearInterval(id);
   }, []);
 
+  if (total === null) return null;
+
   return (
-    <span className="tabular-nums text-lime">
-      {new Intl.NumberFormat("en-US").format(value)}
-    </span>
+    <p className="mt-6 text-sm text-white/45">
+      <span className="tabular-nums text-lime">
+        {new Intl.NumberFormat("en-US").format(total)}
+      </span>{" "}
+      {total === 1 ? "visit" : "visits"} so far
+    </p>
   );
 }
 
@@ -70,9 +97,11 @@ export function HowItWorks() {
 export function Leaderboard({
   spots,
   onSelect,
+  onOutbid,
 }: {
   spots: SpotView[];
   onSelect: (name: string) => void;
+  onOutbid: (name: string) => void;
 }) {
   const ranked = [...spots].sort((a, b) => b.currentPrice - a.currentPrice);
 
@@ -84,40 +113,92 @@ export function Leaderboard({
       </div>
 
       <div className="mt-8 divide-y divide-white/5 overflow-hidden rounded-3xl border border-white/10">
-        {ranked.map((s, i) => (
-          <button
-            key={s.name}
-            onClick={() => onSelect(s.name)}
-            className="flex w-full items-center gap-4 bg-white/[0.02] px-4 py-4 text-left transition hover:bg-white/[0.05] sm:px-6"
-          >
-            <span className="w-6 font-display text-sm text-white/30">{i + 1}</span>
+        {ranked.map((s, i) => {
+          const site = safeUrl(s.brand?.website);
+          const domain = prettyDomain(s.brand?.website);
+          const x = twitterUrl(s.brand?.twitter);
+          const ig = instagramUrl(s.brand?.instagram);
 
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black">
-              {s.brand?.logo ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={s.brand.logo} alt={s.brand.name} className="h-8 w-8 object-contain" />
-              ) : (
-                <span className="text-lg text-white/20">+</span>
-              )}
-            </div>
+          return (
+            <div
+              key={s.name}
+              className="flex items-center gap-4 bg-white/[0.02] px-4 py-4 transition hover:bg-white/[0.04] sm:px-6"
+            >
+              <span className="w-6 font-display text-sm text-white/30">{i + 1}</span>
 
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold">
-                {s.brand?.name ?? <span className="text-white/35">Available</span>}
-              </p>
-              <p className="truncate text-xs text-white/40">{s.displayName}</p>
-            </div>
+              <button
+                onClick={() => onSelect(s.name)}
+                aria-label={s.brand ? s.brand.name : s.displayName}
+                className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black transition hover:border-lime/50"
+              >
+                {s.brand?.logo ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={s.brand.logo} alt={s.brand.name} className="h-8 w-8 object-contain" />
+                ) : (
+                  <span className="text-lg text-white/20">+</span>
+                )}
+              </button>
 
-            <div className="text-right">
-              <p className="font-display font-bold">
-                {s.currentPrice > 0 ? formatMoney(s.currentPrice) : formatMoney(s.minBid)}
-              </p>
-              <p className="text-[11px] uppercase tracking-wider text-lime">
-                {s.brand ? "Outbid" : "Open"}
-              </p>
+              <div className="min-w-0 flex-1">
+                {/* El enlace de la marca es justo lo que compro: tiene que
+                    poder abrirse, no solo mirarse. */}
+                {site ? (
+                  <a
+                    href={site}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="truncate font-semibold transition hover:text-lime"
+                  >
+                    {s.brand?.name} <span className="text-white/30">↗</span>
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => onSelect(s.name)}
+                    className="block truncate font-semibold"
+                  >
+                    {s.brand?.name ?? <span className="text-white/35">Available</span>}
+                  </button>
+                )}
+
+                <div className="flex items-center gap-2 text-xs text-white/40">
+                  <span className="truncate">{s.displayName}</span>
+                  {domain && <span className="hidden truncate sm:inline">· {domain}</span>}
+                  {x && (
+                    <a
+                      href={x}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="transition hover:text-lime"
+                      aria-label={`${s.brand?.name} on X`}
+                    >
+                      𝕏
+                    </a>
+                  )}
+                  {ig && (
+                    <a
+                      href={ig}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="transition hover:text-lime"
+                      aria-label={`${s.brand?.name} on Instagram`}
+                    >
+                      ◎
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <button onClick={() => onOutbid(s.name)} className="shrink-0 text-right">
+                <p className="font-display font-bold">
+                  {s.currentPrice > 0 ? formatMoney(s.currentPrice) : formatMoney(s.minBid)}
+                </p>
+                <p className="text-[11px] uppercase tracking-wider text-lime">
+                  {s.brand ? "Outbid" : "Open"}
+                </p>
+              </button>
             </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
