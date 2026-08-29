@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { and, desc, eq } from "drizzle-orm";
 import { db, spots, brands, bids } from "@/db";
-import { nextBidAmount, formatCOP } from "@/lib/spots";
-import { checkoutUrl, newReference } from "@/lib/wompi";
+import { nextBidAmount, formatMoney } from "@/lib/spots";
+import { newReference, startCheckout } from "@/lib/wompi";
 
 export const dynamic = "force-dynamic";
 
@@ -117,20 +117,29 @@ export async function POST(req: Request) {
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
 
-    const url = checkoutUrl({
+    const checkout = await startCheckout({
       reference,
       amountInCents: amount,
       customerEmail: email,
-      redirectUrl: `${origin}/gracias?ref=${reference}`,
+      productName: `mypack.lol — ${spot.displayName}`,
+      description: `Logo de ${brandName} en la zona "${spot.displayName}" de la mochila.`,
+      origin,
     });
+
+    if (checkout.providerId) {
+      await db
+        .update(bids)
+        .set({ wompiTransactionId: checkout.providerId })
+        .where(eq(bids.wompiReference, reference));
+    }
 
     return NextResponse.json({
       reference,
       amount,
       credit,
       newPrice: target,
-      amountLabel: formatCOP(amount),
-      checkoutUrl: url,
+      amountLabel: formatMoney(amount),
+      checkoutUrl: checkout.url,
     });
   } catch (error) {
     console.error("[bids] ", error);

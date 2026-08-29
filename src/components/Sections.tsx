@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatCOP } from "@/lib/spots";
+import { formatMoney } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 /** ~4.200 impresiones al día caminando la ciudad. */
@@ -110,7 +110,7 @@ export function Leaderboard({
 
             <div className="text-right">
               <p className="font-display font-bold">
-                {s.currentPrice > 0 ? formatCOP(s.currentPrice) : formatCOP(s.minBid)}
+                {s.currentPrice > 0 ? formatMoney(s.currentPrice) : formatMoney(s.minBid)}
               </p>
               <p className="text-[11px] uppercase tracking-wider text-lime">
                 {s.brand ? "Outbid" : "Libre"}

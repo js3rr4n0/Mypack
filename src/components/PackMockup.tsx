@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCOP } from "@/lib/spots";
+import { formatMoney } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 /**
@@ -112,7 +112,7 @@ export default function PackMockup({ spots }: { spots: SpotView[] }) {
         {spots.slice(0, 6).map((s) => (
           <div key={s.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
             <p className="truncate text-white/50">{s.displayName}</p>
-            <p className="font-semibold text-white">{formatCOP(s.nextBid)}</p>
+            <p className="font-semibold text-white">{formatMoney(s.nextBid)}</p>
           </div>
         ))}
       </div>

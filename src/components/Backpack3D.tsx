@@ -10,7 +10,7 @@ import {
   RoundedBox,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { SPOTS, formatCOP, type SpotConfig, type SpotName } from "@/lib/spots";
+import { SPOTS, formatMoney, minBidOf, type SpotConfig, type SpotName } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 const BODY_W = 0.32;
@@ -218,7 +218,7 @@ function Hotspot({
               {data?.brand ? data.brand.name : "Libre"}
             </p>
             <p className="mt-1 text-sm font-bold text-white">
-              {formatCOP(data?.nextBid ?? spot.minBid)}
+              {formatMoney(data?.nextBid ?? minBidOf(spot))}
             </p>
             <span className="mt-2 block rounded-lg bg-lime px-2 py-1.5 text-center text-[11px] font-bold text-black">
               {data?.brand ? "Outbid" : "Poner logo"}

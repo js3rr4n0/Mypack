@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatCOP, MIN_INCREMENT } from "@/lib/spots";
+import { formatMoney, MIN_INCREMENT } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 interface Props {
@@ -129,18 +129,18 @@ export default function BidModal({ spot, onClose }: Props) {
           <div className="flex items-center justify-between text-sm">
             <span className="text-white/50">Precio actual</span>
             <span className="font-semibold">
-              {spot.currentPrice > 0 ? formatCOP(spot.currentPrice) : "—"}
+              {spot.currentPrice > 0 ? formatMoney(spot.currentPrice) : "—"}
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between">
             <span className="text-white/50 text-sm">Debes pagar</span>
             <span className="font-display text-xl font-bold text-lime">
-              {formatCOP(spot.nextBid)}
+              {formatMoney(spot.nextBid)}
             </span>
           </div>
           {taken && (
             <p className="mt-2 text-[11px] text-white/40">
-              Incremento mínimo {formatCOP(MIN_INCREMENT)}. Si tu marca ya estuvo aquí,
+              Incremento mínimo {formatMoney(MIN_INCREMENT)}. Si tu marca ya estuvo aquí,
               solo pagas la diferencia.
             </p>
           )}
@@ -250,7 +250,7 @@ export default function BidModal({ spot, onClose }: Props) {
             disabled={submitting || uploading}
             className="w-full rounded-xl bg-lime py-4 font-display text-base font-bold text-black transition hover:bg-neon disabled:opacity-50"
           >
-            {submitting ? "Redirigiendo a Wompi…" : `Pagar ${formatCOP(spot.nextBid)}`}
+            {submitting ? "Redirigiendo a Wompi…" : `Pagar ${formatMoney(spot.nextBid)}`}
           </button>
           <p className="text-center text-[11px] text-white/35">
             Pago seguro con Wompi. Tu logo aparece cuando la transacción es aprobada.

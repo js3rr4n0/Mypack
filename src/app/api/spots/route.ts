@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { asc, eq } from "drizzle-orm";
 import { db, spots, brands } from "@/db";
-import { SPOTS, nextBidAmount } from "@/lib/spots";
+import { SPOTS, minBidOf, nextBidAmount } from "@/lib/spots";
 
 export const dynamic = "force-dynamic";
 
@@ -58,10 +58,10 @@ export async function GET() {
         displayName: s.displayName,
         description: s.description,
         positionOrder: s.positionOrder,
-        minBid: s.minBid,
+        minBid: minBidOf(s),
         currentPrice: 0,
         isActive: true,
-        nextBid: s.minBid,
+        nextBid: minBidOf(s),
         brand: null,
       })),
     });

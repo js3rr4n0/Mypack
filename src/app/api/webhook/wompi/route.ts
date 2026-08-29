@@ -1,34 +1,42 @@
 import { NextResponse } from "next/server";
 import { and, eq, ne } from "drizzle-orm";
 import { db, spots, bids } from "@/db";
-import { verifyWebhookSignature, getTransaction } from "@/lib/wompi";
+import { COUNTRY, resolveEvent } from "@/lib/wompi";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/webhook/wompi
- * Evento transaction.updated. La zona se actualiza unicamente con APPROVED.
+ *
+ * SV: Wompi notifica al urlWebhook del enlace de pago. Como el evento no viene
+ *     firmado, la URL lleva un token secreto y el estado se reconfirma contra
+ *     GET /TransaccionCompra/{id}.
+ * CO: evento `transaction.updated` con checksum verificado.
+ *
+ * En ambos casos la zona solo cambia de dueno cuando el pago quedo aprobado.
  */
 export async function POST(req: Request) {
-  const event = await req.json().catch(() => null);
-  if (!event) return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
-
-  if (!verifyWebhookSignature(event)) {
-    console.warn("[wompi] firma invalida");
-    return NextResponse.json({ error: "Firma invalida" }, { status: 401 });
+  const payload = await req.json().catch(() => null);
+  if (!payload) {
+    return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
   }
 
-  if (event.event !== "transaction.updated") {
-    return NextResponse.json({ ok: true, ignored: event.event });
+  let resolved;
+  try {
+    resolved = await resolveEvent(payload, new URL(req.url).searchParams);
+  } catch (error) {
+    console.warn("[wompi] evento rechazado:", error);
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const tx = event?.data?.transaction;
-  const reference: string | undefined = tx?.reference;
-  if (!reference) return NextResponse.json({ error: "Sin referencia" }, { status: 400 });
+  if ("ignored" in resolved) {
+    return NextResponse.json({ ok: true, ignored: resolved.ignored });
+  }
 
-  // La verdad la tiene la API, no el payload.
-  const confirmed = tx?.id ? await getTransaction(tx.id) : null;
-  const status: string = (confirmed?.status ?? tx?.status ?? "").toUpperCase();
+  const { reference, transactionId, status } = resolved;
+  if (!reference) {
+    return NextResponse.json({ error: "Sin referencia" }, { status: 400 });
+  }
 
   const [bid] = await db
     .select()
@@ -41,15 +49,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, alreadyProcessed: bid.status });
   }
 
-  if (status !== "APPROVED") {
+  if (status !== "approved") {
     await db
       .update(bids)
-      .set({
-        status: status === "DECLINED" || status === "ERROR" || status === "VOIDED"
-          ? "declined"
-          : "pending",
-        wompiTransactionId: tx?.id ?? null,
-      })
+      .set({ status, wompiTransactionId: transactionId ?? bid.wompiTransactionId })
       .where(eq(bids.id, bid.id));
     return NextResponse.json({ ok: true, status });
   }
@@ -57,21 +60,28 @@ export async function POST(req: Request) {
   const [spot] = await db.select().from(spots).where(eq(spots.id, bid.spotId)).limit(1);
   if (!spot) return NextResponse.json({ ok: true, missingSpot: bid.spotId });
 
-  // El precio nuevo es el que la puja buscaba alcanzar, no lo que se cobro
-  // (una marca que regresa paga solo la diferencia).
+  // El precio nuevo es el que la puja buscaba alcanzar, no necesariamente lo que
+  // se cobro (una marca que regresa paga solo la diferencia).
   const newPrice = Math.max(
     (bid.previousPrice ?? 0) + bid.amount,
     spot.currentPrice + 1,
     spot.minBid
   );
 
-  await db.update(bids).set({ isOutbid: true }).where(
-    and(eq(bids.spotId, spot.id), eq(bids.status, "approved"), ne(bids.id, bid.id))
-  );
+  await db
+    .update(bids)
+    .set({ isOutbid: true })
+    .where(
+      and(eq(bids.spotId, spot.id), eq(bids.status, "approved"), ne(bids.id, bid.id))
+    );
 
   await db
     .update(bids)
-    .set({ status: "approved", wompiTransactionId: tx?.id ?? null, isOutbid: false })
+    .set({
+      status: "approved",
+      wompiTransactionId: transactionId ?? bid.wompiTransactionId,
+      isOutbid: false,
+    })
     .where(eq(bids.id, bid.id));
 
   await db
@@ -83,5 +93,5 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, endpoint: "wompi webhook" });
+  return NextResponse.json({ ok: true, endpoint: "wompi webhook", country: COUNTRY });
 }

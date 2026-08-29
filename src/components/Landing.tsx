@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import BidModal from "./BidModal";
 import PackMockup from "./PackMockup";
 import { FAQ, Footer, HowItWorks, ImpressionCounter, Leaderboard } from "./Sections";
-import { SPOTS, formatCOP, type SpotName } from "@/lib/spots";
+import { SPOTS, formatMoney, minBidOf, type SpotName } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
 const Backpack3D = dynamic(() => import("./Backpack3D"), {
@@ -23,10 +23,10 @@ const FALLBACK: SpotView[] = SPOTS.map((s, i) => ({
   displayName: s.displayName,
   description: s.description,
   positionOrder: s.positionOrder,
-  minBid: s.minBid,
+  minBid: minBidOf(s),
   currentPrice: 0,
   isActive: true,
-  nextBid: s.minBid,
+  nextBid: minBidOf(s),
   brand: null,
 }));
 
@@ -124,7 +124,7 @@ export default function Landing() {
           </div>
 
           <p className="mt-4 text-xs text-white/30">
-            Desde {formatCOP(cheapest?.nextBid ?? 5_000_000)} · pago seguro con Wompi
+            Desde {formatMoney(cheapest?.nextBid ?? 0)} · pago seguro con Wompi
           </p>
         </div>
       </header>
@@ -142,7 +142,7 @@ export default function Landing() {
             >
               <p className="truncate text-xs text-white/45">{s.displayName}</p>
               <p className="truncate text-sm font-semibold">
-                {s.brand?.name ?? formatCOP(s.nextBid)}
+                {s.brand?.name ?? formatMoney(s.nextBid)}
               </p>
             </button>
           ))}
