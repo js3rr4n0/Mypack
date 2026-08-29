@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import BidModal from "./BidModal";
+import BrandPopup from "./BrandPopup";
 import CanvasBoundary from "./CanvasBoundary";
 import Pack360 from "./Pack360";
 import { FAQ, Footer, HowItWorks, Leaderboard, VisitCounter } from "./Sections";
@@ -34,6 +35,7 @@ const FALLBACK: SpotView[] = SPOTS.map((s, i) => ({
 export default function Landing() {
   const [spots, setSpots] = useState<SpotView[]>(FALLBACK);
   const [selected, setSelected] = useState<SpotName | null>(null);
+  const [viewing, setViewing] = useState<SpotName | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -48,11 +50,33 @@ export default function Landing() {
     };
   }, []);
 
-  const select = useCallback((name: string) => setSelected(name as SpotName), []);
+  /** Ir directo a pujar por una zona. */
+  const bid = useCallback((name: string) => {
+    setViewing(null);
+    setSelected(name as SpotName);
+  }, []);
+
+  /**
+   * Tocar una zona: si tiene dueno se muestra la marca y sus enlaces, que es lo
+   * que compro; si esta libre, se va derecho al formulario.
+   */
+  const open = useCallback(
+    (name: string) => {
+      const spot = spots.find((s) => s.name === name);
+      if (spot?.brand) setViewing(name as SpotName);
+      else setSelected(name as SpotName);
+    },
+    [spots]
+  );
 
   const selectedSpot = useMemo(
     () => spots.find((s) => s.name === selected) ?? null,
     [spots, selected]
+  );
+
+  const viewingSpot = useMemo(
+    () => spots.find((s) => s.name === viewing) ?? null,
+    [spots, viewing]
   );
 
   const cheapest = useMemo(
@@ -75,7 +99,7 @@ export default function Landing() {
             <a href="#faq" className="transition hover:text-white">FAQ</a>
           </div>
           <button
-            onClick={() => select(cheapest?.name ?? "main_front")}
+            onClick={() => bid(cheapest?.name ?? "main_front")}
             className="rounded-full bg-lime px-4 py-2 text-xs font-bold text-black transition hover:bg-neon"
           >
             Put my logo on
@@ -109,7 +133,7 @@ export default function Landing() {
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <button
-              onClick={() => select(cheapest?.name ?? "main_front")}
+              onClick={() => bid(cheapest?.name ?? "main_front")}
               className="glow w-full rounded-full bg-lime px-8 py-4 font-display text-base font-bold text-black transition hover:bg-neon sm:w-auto"
             >
               Put my logo on
@@ -147,14 +171,14 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
             </div>
           }
         >
-          <Backpack3D spots={spots} onSelect={select} />
+          <Backpack3D spots={spots} onSelect={open} />
         </CanvasBoundary>
 
         <div className="mx-auto mt-4 grid max-w-4xl grid-cols-2 gap-2 px-5 sm:grid-cols-3">
           {spots.map((s) => (
             <button
               key={s.name}
-              onClick={() => select(s.name)}
+              onClick={() => open(s.name)}
               className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5 text-left transition hover:border-lime/50"
             >
               <p className="truncate text-xs text-white/45">{s.displayName}</p>
@@ -191,12 +215,12 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
               ))}
             </ul>
           </div>
-          <Pack360 spots={spots} onSelect={select} />
+          <Pack360 spots={spots} onSelect={open} />
         </div>
       </section>
 
       <HowItWorks />
-      <Leaderboard spots={spots} onSelect={select} />
+      <Leaderboard spots={spots} onSelect={open} onOutbid={bid} />
       <FAQ />
 
       {/* Final CTA */}
@@ -209,7 +233,7 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
             The only question is which logo it sees today.
           </p>
           <button
-            onClick={() => select(cheapest?.name ?? "main_front")}
+            onClick={() => bid(cheapest?.name ?? "main_front")}
             className="mt-7 rounded-full bg-lime px-8 py-4 font-display font-bold text-black transition hover:bg-neon"
           >
             Put my logo on
@@ -219,6 +243,11 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
 
       <Footer />
 
+      <BrandPopup
+        spot={viewingSpot}
+        onClose={() => setViewing(null)}
+        onOutbid={bid}
+      />
       <BidModal spot={selectedSpot} onClose={() => setSelected(null)} />
     </main>
   );
