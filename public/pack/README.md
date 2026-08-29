@@ -28,7 +28,7 @@ Si falta alguna, la web no se rompe: muestra un marcador diciendo cuál falta.
 Cada cuadro declara dónde cae cada zona en esa foto, porque el panel frontal no
 está en el mismo sitio de frente que en tres cuartos.
 
-Abre la home con `?zonas=1`: se dibuja el recuadro de cada zona con su nombre
+Abre la home con `?zones=1`: se dibuja el recuadro de cada zona con su nombre
 encima de la foto. Ajusta los valores `{ x, y, w, h, rotate }` del cuadro
 correspondiente en `src/lib/pack-frames.ts` — todo en % del tamaño de la foto —
 hasta que calcen, y quita el parámetro.

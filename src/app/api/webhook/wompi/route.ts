@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   const payload = await req.json().catch(() => null);
   if (!payload) {
-    return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   let resolved;
@@ -23,12 +23,12 @@ export async function POST(req: Request) {
     resolved = await resolveEvent(payload, new URL(req.url).searchParams);
   } catch (error) {
     console.warn("[wompi] evento rechazado:", error);
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { reference, transactionId, status } = resolved;
   if (!reference) {
-    return NextResponse.json({ error: "Sin referencia" }, { status: 400 });
+    return NextResponse.json({ error: "Missing reference" }, { status: 400 });
   }
 
   const [bid] = await db

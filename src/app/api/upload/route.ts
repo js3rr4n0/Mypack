@@ -16,13 +16,13 @@ export async function POST(req: Request) {
   const file = form?.get("file");
 
   if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Falta el archivo" }, { status: 400 });
+    return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "Maximo 5MB" }, { status: 413 });
+    return NextResponse.json({ error: "5MB maximum" }, { status: 413 });
   }
   if (!ALLOWED.includes(file.type)) {
-    return NextResponse.json({ error: "Formato no soportado (PNG o SVG)" }, { status: 415 });
+    return NextResponse.json({ error: "Unsupported format (PNG or SVG)" }, { status: 415 });
   }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);

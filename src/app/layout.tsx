@@ -14,19 +14,19 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: "My Pack. Your Brand. — mypack.lol",
   description:
-    "Soy un walking billboard. Tu logo camina conmigo todos los días por la ciudad. Subasta abierta por 6 zonas de mi mochila.",
+    "I'm a walking billboard. Your logo walks the city with me every single day. Eight spots on my backpack, open to the highest bidder.",
   openGraph: {
     title: "My Pack. Your Brand.",
-    description: "Tu logo camina conmigo todos los días por la ciudad.",
+    description: "Your logo walks the city with me every single day.",
     url: siteUrl(),
     siteName: "mypack.lol",
-    locale: "es_SV",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "My Pack. Your Brand.",
-    description: "Tu logo camina conmigo todos los días por la ciudad.",
+    description: "Your logo walks the city with me every single day.",
   },
 };
 
@@ -40,7 +40,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${display.variable}`}>
+    <html lang="en" className={`${inter.variable} ${display.variable}`}>
       <body className="grain font-sans antialiased">{children}</body>
     </html>
   );

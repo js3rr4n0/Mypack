@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/spots";
 import type { SpotView } from "@/lib/types";
 
-/** ~4.200 impresiones al día caminando la ciudad. */
+/** ~4,200 impressions a day walking the city. */
 const DAILY_IMPRESSIONS = 4200;
 const START = new Date("2026-01-01T00:00:00Z").getTime();
 
@@ -24,7 +24,7 @@ export function ImpressionCounter() {
 
   return (
     <span className="tabular-nums text-lime">
-      {new Intl.NumberFormat("es-SV").format(value)}
+      {new Intl.NumberFormat("en-US").format(value)}
     </span>
   );
 }
@@ -33,24 +33,24 @@ export function HowItWorks() {
   const steps = [
     {
       n: "01",
-      title: "Elige tu zona",
-      body: "Gira la mochila, mira las 6 zonas disponibles y elige dónde quieres que viva tu logo.",
+      title: "Pick your spot",
+      body: "Spin the pack, look over the eight available spots, and choose where your logo lives.",
     },
     {
       n: "02",
-      title: "Sube tu logo y paga",
-      body: "PNG o SVG en alta calidad. Pagas por Wompi el precio actual más el incremento mínimo.",
+      title: "Upload your logo and pay",
+      body: "High-res PNG or SVG. You pay the current price plus the minimum increment, through Wompi.",
     },
     {
       n: "03",
-      title: "Camino con tu marca",
-      body: "Apenas se aprueba el pago, tu logo aparece en la mochila y sale a la calle conmigo cada día.",
+      title: "I walk with your brand",
+      body: "The moment the payment clears, your logo goes on the pack and hits the street with me every day.",
     },
   ];
 
   return (
     <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
-      <h2 className="font-display text-3xl font-bold sm:text-5xl">Cómo funciona</h2>
+      <h2 className="font-display text-3xl font-bold sm:text-5xl">How it works</h2>
       <div className="mt-10 grid gap-5 sm:grid-cols-3">
         {steps.map((s) => (
           <div
@@ -80,7 +80,7 @@ export function Leaderboard({
     <section id="leaderboard" className="mx-auto max-w-4xl px-5 py-20 sm:py-28">
       <div className="flex items-end justify-between gap-4">
         <h2 className="font-display text-3xl font-bold sm:text-5xl">Leaderboard</h2>
-        <p className="text-sm text-white/40">Quién está caminando conmigo</p>
+        <p className="text-sm text-white/40">Who's walking with me</p>
       </div>
 
       <div className="mt-8 divide-y divide-white/5 overflow-hidden rounded-3xl border border-white/10">
@@ -103,7 +103,7 @@ export function Leaderboard({
 
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">
-                {s.brand?.name ?? <span className="text-white/35">Disponible</span>}
+                {s.brand?.name ?? <span className="text-white/35">Available</span>}
               </p>
               <p className="truncate text-xs text-white/40">{s.displayName}</p>
             </div>
@@ -113,7 +113,7 @@ export function Leaderboard({
                 {s.currentPrice > 0 ? formatMoney(s.currentPrice) : formatMoney(s.minBid)}
               </p>
               <p className="text-[11px] uppercase tracking-wider text-lime">
-                {s.brand ? "Outbid" : "Libre"}
+                {s.brand ? "Outbid" : "Open"}
               </p>
             </div>
           </button>
@@ -126,24 +126,24 @@ export function Leaderboard({
 export function FAQ() {
   const items = [
     {
-      q: "¿Cuánto dura mi logo en la mochila?",
-      a: "Hasta que otra marca pague más por esa zona. Si te sacan, te aviso por email y puedes recuperarla pagando solo la diferencia.",
+      q: "How long does my logo stay on the pack?",
+      a: "Until another brand pays more for that spot. If you get outbid I'll email you, and you can take it back by paying only the difference.",
     },
     {
-      q: "¿Qué formato debe tener el logo?",
-      a: "PNG con fondo transparente o SVG, hasta 5MB. Entre más alta la resolución, mejor se ve impreso.",
+      q: "What format should the logo be?",
+      a: "PNG with a transparent background, or SVG, up to 5MB. The higher the resolution, the better it prints.",
     },
     {
-      q: "¿Cómo sé que realmente uso la mochila?",
-      a: "Publico fotos y ubicaciones cada semana en las redes del proyecto. Camino San Salvador todos los días, esa es la razón de ser de esto.",
+      q: "How do I know you actually carry the pack?",
+      a: "I post photos and locations every week on the project's socials. I walk San Salvador every day — that's the whole point of this.",
     },
     {
-      q: "¿Cómo se paga?",
-      a: "Con Wompi: tarjeta de crédito o débito y QuickPay (QR). Tu logo se publica automáticamente cuando la transacción queda aprobada.",
+      q: "How do I pay?",
+      a: "Through Wompi: credit or debit card, and QuickPay (QR). Your logo goes live automatically once the transaction is approved.",
     },
     {
-      q: "¿Aceptan cualquier marca?",
-      a: "No. Me reservo el derecho de rechazar contenido ilegal, ofensivo o político, y en ese caso devuelvo el pago completo.",
+      q: "Do you accept any brand?",
+      a: "No. I reserve the right to turn down anything illegal, offensive, or political — and in that case I refund the payment in full.",
     },
   ];
 
@@ -175,7 +175,7 @@ export function Footer() {
     <footer className="border-t border-white/5 px-5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-white/35 sm:flex-row">
         <p className="font-display font-semibold text-white/70">mypack.lol</p>
-        <p>Un walking billboard en San Salvador. Pagos seguros por Wompi.</p>
+        <p>A walking billboard in San Salvador. Payments secured by Wompi.</p>
         <p>© {new Date().getFullYear()}</p>
       </div>
     </footer>

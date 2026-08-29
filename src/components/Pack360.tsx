@@ -38,7 +38,7 @@ export default function Pack360({
   );
 
   useEffect(() => {
-    setDebug(new URLSearchParams(window.location.search).has("zonas"));
+    setDebug(new URLSearchParams(window.location.search).has("zones"));
   }, []);
 
   // Precarga: sin esto, girar muestra un parpadeo blanco en cada cuadro nuevo.
@@ -91,7 +91,7 @@ export default function Pack360({
       <div
         ref={containerRef}
         role="group"
-        aria-label="Vista 360 de la mochila"
+        aria-label="360 view of the pack"
         tabIndex={0}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -115,7 +115,7 @@ export default function Pack360({
         {isMissing ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-8 text-center">
             <span className="text-4xl opacity-25">🎒</span>
-            <p className="text-sm text-white/40">Falta la foto</p>
+            <p className="text-sm text-white/40">Missing photo</p>
             <code className="rounded bg-white/5 px-2 py-1 text-xs text-white/55">
               public{frame.src}
             </code>
@@ -128,7 +128,7 @@ export default function Pack360({
             <img
               key={f.src}
               src={f.src}
-              alt={`Mochila — ${f.label}`}
+              alt={`Backpack — ${f.label}`}
               draggable={false}
               onError={() => setMissing((m) => ({ ...m, [f.src]: true }))}
               className="absolute inset-0 h-full w-full object-cover"
@@ -174,7 +174,7 @@ export default function Pack360({
                   />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center rounded border border-dashed border-lime/50 bg-lime/5 text-[8px] font-bold uppercase tracking-wider text-lime/80">
-                    {debug ? name : "Tu logo"}
+                    {debug ? name : "Your logo"}
                   </span>
                 )}
               </button>
@@ -207,7 +207,7 @@ export default function Pack360({
       </div>
 
       <p className="mt-3 text-center text-[11px] uppercase tracking-[0.2em] text-white/30">
-        Arrastra para girar
+        Drag to spin
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">

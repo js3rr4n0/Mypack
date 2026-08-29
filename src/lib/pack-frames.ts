@@ -10,7 +10,7 @@ import type { SpotName } from "./spots";
  * pequeno cuando esta escorzado. Todo va en % del tamano de la foto.
  *
  * Las coordenadas de abajo estan medidas sobre las fotos ya normalizadas
- * (1200x1800). Para reajustarlas: abre la home con ?zonas=1 y se dibujan los
+ * (1200x1800). Para reajustarlas: abre la home con ?zones=1 y se dibujan los
  * recuadros con su nombre sobre cada cuadro.
  */
 export interface FrameZone {
@@ -36,7 +36,7 @@ export const FRAMES: PackFrame[] = [
   {
     // Frente en tres cuartos: se ve el panel frontal y el costado izquierdo.
     src: "/pack/360/01.jpg",
-    label: "Costado izquierdo",
+    label: "Left side",
     zones: {
       main_front: { x: 28, y: 51, w: 26, h: 9, rotate: 8, opacity: 0.95 },
       left_top: { x: 62, y: 42, w: 15, h: 6, rotate: -3 },
@@ -47,7 +47,7 @@ export const FRAMES: PackFrame[] = [
   {
     // Frente plano: el panel frontal a tamano completo.
     src: "/pack/360/02.jpg",
-    label: "Frente",
+    label: "Front",
     zones: {
       main_front: { x: 50, y: 49, w: 32, h: 11 },
       front_pocket: { x: 50, y: 66, w: 24, h: 6 },
@@ -56,7 +56,7 @@ export const FRAMES: PackFrame[] = [
   {
     // Tres cuartos del otro lado: panel frontal y costado derecho.
     src: "/pack/360/03.jpg",
-    label: "Costado derecho",
+    label: "Right side",
     zones: {
       right_top: { x: 39, y: 33, w: 16, h: 6, rotate: -6 },
       right_mid: { x: 39, y: 51, w: 16, h: 6, rotate: -6 },

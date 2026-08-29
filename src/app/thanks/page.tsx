@@ -34,16 +34,16 @@ function Result() {
   const status = data?.status ?? "pending";
   const copy: Record<string, { title: string; body: string }> = {
     approved: {
-      title: "¡Tu logo ya camina conmigo!",
-      body: "El pago fue aprobado y tu marca ya está en la mochila. Nos vemos en la calle.",
+      title: "Your logo is walking with me!",
+      body: "The payment went through and your brand is on the pack. See you out on the street.",
     },
     pending: {
-      title: "Estamos confirmando tu pago",
-      body: "Wompi está procesando la transacción. Esta página se actualiza sola; también te llegará un email.",
+      title: "Confirming your payment",
+      body: "Wompi is still processing the transaction. This page refreshes itself, and you'll get an email too.",
     },
     declined: {
-      title: "El pago fue rechazado",
-      body: "No se hizo ningún cobro. Puedes intentarlo de nuevo desde la página principal.",
+      title: "The payment was declined",
+      body: "Nothing was charged. You can try again from the home page.",
     },
   };
 
@@ -64,26 +64,26 @@ function Result() {
       <p className="mt-4 text-white/55">{c.body}</p>
       {data?.spot && (
         <p className="mt-6 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm text-white/60">
-          Zona: <span className="text-white">{data.spot}</span>
+          Spot: <span className="text-white">{data.spot}</span>
         </p>
       )}
       {ref && (
-        <p className="mt-4 break-all text-xs text-white/25">Referencia: {ref}</p>
+        <p className="mt-4 break-all text-xs text-white/25">Reference: {ref}</p>
       )}
       {status === "pending" && tries > 0 && (
-        <p className="mt-2 text-xs text-white/25">Consultando… ({tries})</p>
+        <p className="mt-2 text-xs text-white/25">Checking… ({tries})</p>
       )}
       <a
         href="/"
         className="mt-8 rounded-full border border-white/15 px-7 py-3 text-sm font-semibold transition hover:border-lime hover:text-lime"
       >
-        Volver a mypack.lol
+        Back to mypack.lol
       </a>
     </div>
   );
 }
 
-export default function Gracias() {
+export default function Thanks() {
   return (
     <Suspense fallback={null}>
       <Result />

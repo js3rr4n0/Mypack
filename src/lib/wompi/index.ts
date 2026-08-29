@@ -111,7 +111,7 @@ export interface CheckoutInput {
 export async function startCheckout(
   input: CheckoutInput
 ): Promise<{ url: string; providerId: string }> {
-  const redirectUrl = `${input.origin}/gracias?ref=${encodeURIComponent(
+  const redirectUrl = `${input.origin}/thanks?ref=${encodeURIComponent(
     input.reference
   )}`;
 

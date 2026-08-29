@@ -211,13 +211,13 @@ function Hotspot({
               />
             )}
             <p className="mt-1 text-[11px] text-white/60">
-              {data?.brand ? data.brand.name : "Libre"}
+              {data?.brand ? data.brand.name : "Open"}
             </p>
             <p className="mt-1 text-sm font-bold text-white">
               {formatMoney(data?.nextBid ?? spot.minBid)}
             </p>
             <span className="mt-2 block rounded-lg bg-lime px-2 py-1.5 text-center text-[11px] font-bold text-black">
-              {data?.brand ? "Outbid" : "Poner logo"}
+              {data?.brand ? "Outbid" : "Claim it"}
             </span>
           </button>
         </Html>
@@ -434,7 +434,7 @@ export default function Backpack3D({
       </Canvas>
 
       <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-center text-[11px] uppercase tracking-[0.2em] text-white/35">
-        Arrastra para rotar · toca una zona
+        Drag to rotate · tap a spot
       </p>
     </div>
   );

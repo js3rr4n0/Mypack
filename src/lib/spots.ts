@@ -29,9 +29,9 @@ export interface SpotConfig {
 export const SPOTS: SpotConfig[] = [
   {
     name: "main_front",
-    displayName: "Panel Frontal",
+    displayName: "Front Panel",
     description:
-      "El billboard. El panel más grande y el que más tiempo pasa a la altura de los ojos.",
+      "The billboard. The biggest panel, and the one that spends the most time at eye level.",
     positionOrder: 1,
     minBid: 7_500,
     premium: true,
@@ -41,8 +41,8 @@ export const SPOTS: SpotConfig[] = [
   },
   {
     name: "front_pocket",
-    displayName: "Bolsillo Frontal",
-    description: "Justo bajo el panel principal, sobre el sistema MOLLE.",
+    displayName: "Front Pocket",
+    description: "Right below the main panel, on the MOLLE webbing.",
     positionOrder: 2,
     minBid: 3_000,
     premium: false,
@@ -54,8 +54,8 @@ export const SPOTS: SpotConfig[] = [
   // --- Lateral izquierdo (tres franjas) ---
   {
     name: "left_top",
-    displayName: "Lateral Izquierdo · Superior",
-    description: "A la altura del hombro. Lo primero que se ve al pasar por un lado.",
+    displayName: "Left Side · Top",
+    description: "Shoulder height. The first thing you see walking past me.",
     positionOrder: 3,
     minBid: 2_500,
     premium: false,
@@ -65,8 +65,8 @@ export const SPOTS: SpotConfig[] = [
   },
   {
     name: "left_mid",
-    displayName: "Lateral Izquierdo · Medio",
-    description: "El centro del costado. Se ve todo el tiempo en el microbús y el ascensor.",
+    displayName: "Left Side · Middle",
+    description: "Dead center of the flank. On show all day in the bus and the elevator.",
     positionOrder: 4,
     minBid: 2_000,
     premium: false,
@@ -76,10 +76,12 @@ export const SPOTS: SpotConfig[] = [
   },
   {
     name: "left_bottom",
-    displayName: "Lateral Izquierdo · Inferior",
-    description: "Sobre el MOLLE, junto al bolsillo de botella.",
+    displayName: "Left Side · Bottom",
+    description: "On the MOLLE, next to the bottle pocket.",
     positionOrder: 5,
-    minBid: 1_800,
+    // Precio de prueba: $1 para poder hacer un pago real de punta a punta.
+    // Subir a 1_800 ($18) cuando la prueba este hecha.
+    minBid: 100,
     premium: false,
     hotspot: [-0.325, -0.25, 0],
     face: "left",
@@ -89,8 +91,8 @@ export const SPOTS: SpotConfig[] = [
   // --- Lateral derecho (tres franjas) ---
   {
     name: "right_top",
-    displayName: "Lateral Derecho · Superior",
-    description: "A la altura del hombro, del lado de la calle.",
+    displayName: "Right Side · Top",
+    description: "Shoulder height, on the street side.",
     positionOrder: 6,
     minBid: 2_500,
     premium: false,
@@ -100,8 +102,8 @@ export const SPOTS: SpotConfig[] = [
   },
   {
     name: "right_mid",
-    displayName: "Lateral Derecho · Medio",
-    description: "El centro del costado derecho. Visible al caminar por la acera.",
+    displayName: "Right Side · Middle",
+    description: "Center of the right flank. In full view on the sidewalk.",
     positionOrder: 7,
     minBid: 2_000,
     premium: false,
@@ -111,8 +113,8 @@ export const SPOTS: SpotConfig[] = [
   },
   {
     name: "right_bottom",
-    displayName: "Lateral Derecho · Inferior",
-    description: "Sobre el MOLLE del lado del bolsillo de botella.",
+    displayName: "Right Side · Bottom",
+    description: "On the MOLLE, bottle-pocket side.",
     positionOrder: 8,
     minBid: 1_800,
     premium: false,

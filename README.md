@@ -20,7 +20,7 @@ travel/tech se subastan en vivo: la marca que más paga camina conmigo por la ci
 | Bolsillo Frontal | `front_pocket` | $30 |
 | Lateral Izquierdo · Superior | `left_top` | $25 |
 | Lateral Izquierdo · Medio | `left_mid` | $20 |
-| Lateral Izquierdo · Inferior | `left_bottom` | $18 |
+| Lateral Izquierdo · Inferior | `left_bottom` | **$1 (precio de prueba)** |
 | Lateral Derecho · Superior | `right_top` | $25 |
 | Lateral Derecho · Medio | `right_mid` | $20 |
 | Lateral Derecho · Inferior | `right_bottom` | $18 |
@@ -28,6 +28,13 @@ travel/tech se subastan en vivo: la marca que más paga camina conmigo por la ci
 Las zonas retiradas (`top_flap`, `top_handle`, `left_side`, `right_side`) se
 desactivan con `is_active = false` en vez de borrarse, para no romper las pujas
 históricas que apunten a ellas.
+
+> **`left_bottom` está en $1 a propósito**, para poder hacer un pago real de punta
+> a punta contra Wompi. Súbelo a `1_800` en `src/lib/spots.ts` cuando termines la
+> prueba, regenera con `npm run db:sql` y vuelve a correr el SQL. Ojo: mientras
+> esté así, el hero anuncia "From $1.00", porque toma la zona más barata.
+
+El sitio está en inglés; la documentación del repo sigue en español.
 
 Los precios se guardan en **centavos enteros de USD** para no arrastrar errores de
 punto flotante. Para tomar una zona ocupada se paga `current_price + $5`. Si una
@@ -45,7 +52,7 @@ se rompe, muestra un marcador.
 Cada cuadro declara dónde cae cada zona **en esa foto**, porque el panel frontal
 no está en el mismo sitio de frente que en tres cuartos, y además se ve más
 pequeño cuando está escorzado. La configuración está en
-`src/lib/pack-frames.ts`. Para reajustarla, abre la home con `?zonas=1`: se
+`src/lib/pack-frames.ts`. Para reajustarla, abre la home con `?zones=1`: se
 dibujan los recuadros de cada zona con su nombre sobre cada cuadro.
 
 Las tres fotos se normalizaron al mismo encuadre y escala (1200×1800) para que
@@ -99,7 +106,7 @@ npm run dev
 2. `POST /EnlacePago` con el token OAuth: la referencia viaja como
    `identificadorEnlaceComercio`, el monto en dólares decimales, y el enlace se
    configura con `urlRedirect` y `urlWebhook`. Se redirige al comprador a `urlEnlace`.
-3. El usuario paga y vuelve a `/gracias?ref=…`, que consulta el estado.
+3. El usuario paga y vuelve a `/thanks?ref=…`, que consulta el estado.
 4. `POST /api/webhook/wompi` — normaliza la notificación y **reconsulta la transacción
    contra la API de Wompi** en vez de confiar en el cuerpo del webhook. Solo con el
    pago aprobado marca las pujas anteriores como `is_outbid`, aprueba la nueva y

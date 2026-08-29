@@ -63,14 +63,14 @@ END $$;
 -- Las 6 zonas de la mochila. min_bid va en centavos de USD.
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES
-  ('main_front', 'Panel Frontal', 'El billboard. El panel más grande y el que más tiempo pasa a la altura de los ojos.', 1, 7500),
-  ('front_pocket', 'Bolsillo Frontal', 'Justo bajo el panel principal, sobre el sistema MOLLE.', 2, 3000),
-  ('left_top', 'Lateral Izquierdo · Superior', 'A la altura del hombro. Lo primero que se ve al pasar por un lado.', 3, 2500),
-  ('left_mid', 'Lateral Izquierdo · Medio', 'El centro del costado. Se ve todo el tiempo en el microbús y el ascensor.', 4, 2000),
-  ('left_bottom', 'Lateral Izquierdo · Inferior', 'Sobre el MOLLE, junto al bolsillo de botella.', 5, 1800),
-  ('right_top', 'Lateral Derecho · Superior', 'A la altura del hombro, del lado de la calle.', 6, 2500),
-  ('right_mid', 'Lateral Derecho · Medio', 'El centro del costado derecho. Visible al caminar por la acera.', 7, 2000),
-  ('right_bottom', 'Lateral Derecho · Inferior', 'Sobre el MOLLE del lado del bolsillo de botella.', 8, 1800)
+  ('main_front', 'Front Panel', 'The billboard. The biggest panel, and the one that spends the most time at eye level.', 1, 7500),
+  ('front_pocket', 'Front Pocket', 'Right below the main panel, on the MOLLE webbing.', 2, 3000),
+  ('left_top', 'Left Side · Top', 'Shoulder height. The first thing you see walking past me.', 3, 2500),
+  ('left_mid', 'Left Side · Middle', 'Dead center of the flank. On show all day in the bus and the elevator.', 4, 2000),
+  ('left_bottom', 'Left Side · Bottom', 'On the MOLLE, next to the bottle pocket.', 5, 100),
+  ('right_top', 'Right Side · Top', 'Shoulder height, on the street side.', 6, 2500),
+  ('right_mid', 'Right Side · Middle', 'Center of the right flank. In full view on the sidewalk.', 7, 2000),
+  ('right_bottom', 'Right Side · Bottom', 'On the MOLLE, bottle-pocket side.', 8, 1800)
 ON CONFLICT ("name") DO UPDATE SET
   "display_name" = EXCLUDED."display_name",
   "description" = EXCLUDED."description",

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   try {
     payload = await req.json();
   } catch {
-    return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   const spotName = clean(payload.spot, 50);
@@ -40,20 +40,20 @@ export async function POST(req: Request) {
   const logoUrl = clean(payload.logoUrl, 2000);
   const logoBase64 = typeof payload.logoBase64 === "string" ? payload.logoBase64 : null;
 
-  if (!spotName) return NextResponse.json({ error: "Falta la zona" }, { status: 400 });
+  if (!spotName) return NextResponse.json({ error: "Missing spot" }, { status: 400 });
   if (!brandName)
-    return NextResponse.json({ error: "El nombre de la marca es obligatorio" }, { status: 400 });
+    return NextResponse.json({ error: "Brand name is required" }, { status: 400 });
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return NextResponse.json({ error: "Email invalido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   if (!logoUrl && !logoBase64)
-    return NextResponse.json({ error: "Sube un logo o pega su URL" }, { status: 400 });
+    return NextResponse.json({ error: "Upload a logo or paste its URL" }, { status: 400 });
   if (logoBase64 && logoBase64.length > MAX_LOGO_BYTES * 1.4)
-    return NextResponse.json({ error: "El logo supera los 5MB" }, { status: 413 });
+    return NextResponse.json({ error: "The logo is over 5MB" }, { status: 413 });
 
   try {
     const [spot] = await db.select().from(spots).where(eq(spots.name, spotName)).limit(1);
     if (!spot || !spot.isActive)
-      return NextResponse.json({ error: "Zona no disponible" }, { status: 404 });
+      return NextResponse.json({ error: "Spot unavailable" }, { status: 404 });
 
     const target = nextBidAmount(spot.currentPrice, spot.minBid);
 
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("[bids] ", error);
     return NextResponse.json(
-      { error: "No se pudo iniciar el pago. Revisa la configuracion del servidor." },
+      { error: "Could not start the payment. Check the server configuration." },
       { status: 500 }
     );
   }

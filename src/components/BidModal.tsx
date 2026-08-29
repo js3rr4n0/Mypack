@@ -44,7 +44,7 @@ export default function BidModal({ spot, onClose }: Props) {
   async function handleFile(file: File) {
     setError(null);
     if (file.size > MAX_BYTES) {
-      setError("El logo debe pesar menos de 5MB.");
+      setError("The logo must be under 5MB.");
       return;
     }
     setUploading(true);
@@ -53,7 +53,7 @@ export default function BidModal({ spot, onClose }: Props) {
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "No se pudo subir el logo");
+      if (!res.ok) throw new Error(json.error ?? "Could not upload the logo");
       if (json.url) {
         setUploaded(json.url);
         setLogoBase64(null);
@@ -63,7 +63,7 @@ export default function BidModal({ spot, onClose }: Props) {
       }
       setLogoUrl("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error subiendo el logo");
+      setError(e instanceof Error ? e.message : "Error uploading the logo");
     } finally {
       setUploading(false);
     }
@@ -89,10 +89,10 @@ export default function BidModal({ spot, onClose }: Props) {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "No se pudo iniciar el pago");
+      if (!res.ok) throw new Error(json.error ?? "Could not start the payment");
       window.location.href = json.checkoutUrl;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error inesperado");
+      setError(e instanceof Error ? e.message : "Unexpected error");
       setSubmitting(false);
     }
   }
@@ -111,14 +111,14 @@ export default function BidModal({ spot, onClose }: Props) {
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-lime">
-              {taken ? "Outbid" : "Zona libre"}
+              {taken ? "Outbid" : "Open spot"}
             </p>
             <h2 className="font-display text-2xl font-bold">{spot.displayName}</h2>
             <p className="mt-1 text-sm text-white/50">{spot.description}</p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label="Close"
             className="rounded-full border border-white/10 px-3 py-1 text-white/60 transition hover:text-white"
           >
             ✕
@@ -127,27 +127,27 @@ export default function BidModal({ spot, onClose }: Props) {
 
         <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-white/50">Precio actual</span>
+            <span className="text-white/50">Current price</span>
             <span className="font-semibold">
               {spot.currentPrice > 0 ? formatMoney(spot.currentPrice) : "—"}
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-white/50 text-sm">Debes pagar</span>
+            <span className="text-white/50 text-sm">You pay</span>
             <span className="font-display text-xl font-bold text-lime">
               {formatMoney(spot.nextBid)}
             </span>
           </div>
           {taken && (
             <p className="mt-2 text-[11px] text-white/40">
-              Incremento mínimo {formatMoney(MIN_INCREMENT)}. Si tu marca ya estuvo aquí,
-              solo pagas la diferencia.
+              Minimum increment {formatMoney(MIN_INCREMENT)}. If your brand held this spot
+              before, you only pay the difference.
             </p>
           )}
         </div>
 
         <form onSubmit={submit} className="space-y-4">
-          <Field label="Nombre de la marca *">
+          <Field label="Brand name *">
             <input
               required
               maxLength={100}
@@ -160,7 +160,7 @@ export default function BidModal({ spot, onClose }: Props) {
 
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-wider text-white/50">
-              Logo HD * (PNG o SVG, máx 5MB)
+              HD logo * (PNG or SVG, max 5MB)
             </label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
@@ -168,7 +168,7 @@ export default function BidModal({ spot, onClose }: Props) {
                 onClick={() => fileRef.current?.click()}
                 className="flex-1 rounded-xl border border-dashed border-white/20 px-4 py-3 text-sm text-white/70 transition hover:border-lime hover:text-lime"
               >
-                {uploading ? "Subiendo…" : "Subir archivo"}
+                {uploading ? "Uploading…" : "Upload a file"}
               </button>
               <input
                 ref={fileRef}
@@ -189,13 +189,13 @@ export default function BidModal({ spot, onClose }: Props) {
                 setLogoBase64(null);
               }}
               className={`${inputCls} mt-2`}
-              placeholder="…o pega la URL del logo"
+              placeholder="…or paste the logo URL"
             />
             {preview && (
               <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="Vista previa" className="h-10 w-auto object-contain" />
-                <span className="text-xs text-white/40">Vista previa</span>
+                <img src={preview} alt="Preview" className="h-10 w-auto object-contain" />
+                <span className="text-xs text-white/40">Preview</span>
               </div>
             )}
           </div>
@@ -207,17 +207,17 @@ export default function BidModal({ spot, onClose }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={inputCls}
-              placeholder="tu@marca.com"
+              placeholder="you@brand.com"
             />
           </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Sitio web">
+            <Field label="Website">
               <input
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 className={inputCls}
-                placeholder="https://marca.com"
+                placeholder="https://brand.com"
               />
             </Field>
             <Field label="Twitter / X">
@@ -225,7 +225,7 @@ export default function BidModal({ spot, onClose }: Props) {
                 value={twitter}
                 onChange={(e) => setTwitter(e.target.value)}
                 className={inputCls}
-                placeholder="@marca"
+                placeholder="@brand"
               />
             </Field>
           </div>
@@ -235,7 +235,7 @@ export default function BidModal({ spot, onClose }: Props) {
               value={instagram}
               onChange={(e) => setInstagram(e.target.value)}
               className={inputCls}
-              placeholder="@marca"
+              placeholder="@brand"
             />
           </Field>
 
@@ -250,10 +250,10 @@ export default function BidModal({ spot, onClose }: Props) {
             disabled={submitting || uploading}
             className="w-full rounded-xl bg-lime py-4 font-display text-base font-bold text-black transition hover:bg-neon disabled:opacity-50"
           >
-            {submitting ? "Redirigiendo a Wompi…" : `Pagar ${formatMoney(spot.nextBid)}`}
+            {submitting ? "Redirecting to Wompi…" : `Pay ${formatMoney(spot.nextBid)}`}
           </button>
           <p className="text-center text-[11px] text-white/35">
-            Pago seguro con Wompi. Tu logo aparece cuando la transacción es aprobada.
+            Secure payment via Wompi. Your logo goes up once the transaction is approved.
           </p>
         </form>
       </div>
