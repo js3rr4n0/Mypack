@@ -49,6 +49,9 @@ export const bids = pgTable("bids", {
   previousPrice: integer("previous_price"),
   isOutbid: boolean("is_outbid").default(false),
   wompiTransactionId: varchar("wompi_transaction_id", { length: 100 }),
+  // Id del Enlace de Pago. Es lo unico que liga un cobro con esta puja: la
+  // transaccion de Wompi trae idExterno en NULL para pagos por enlace.
+  wompiLinkId: varchar("wompi_link_id", { length: 50 }),
   wompiReference: varchar("wompi_reference", { length: 100 }).unique(),
   status: varchar("status", { length: 20 }).default("pending"),
   // Se marca cuando el pago se aprobo pero la zona ya se la habia llevado otra

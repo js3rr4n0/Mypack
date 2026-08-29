@@ -175,61 +175,40 @@ export async function getTransaction(
 }
 
 /** GET /EnlacePago/{id} — para recuperar la referencia del comercio. */
-async function getPaymentLink(
-  idEnlace: number | string
-): Promise<{ identificadorEnlaceComercio?: string } | null> {
-  try {
-    return await api(`/EnlacePago/${encodeURIComponent(String(idEnlace))}`);
-  } catch {
-    return null;
-  }
-}
+
 
 /**
  * GET /TransaccionCompra — busca la transaccion de una referencia sin depender
  * del webhook. Wompi copia `identificadorEnlaceComercio` en el `idExterno` de
  * la transaccion, asi que se filtra por email y fecha y se compara ese campo.
  */
-export async function findTransactionByReference(
-  reference: string,
-  since: Date
-): Promise<WompiTransaction | null> {
-  const day = (d: Date) => d.toISOString().slice(0, 10);
-  const PER_PAGE = 100;
-  const MAX_PAGES = 10;
+export interface PaymentLinkDetail {
+  nombreEnlace?: string;
+  monto?: number;
+  usable?: boolean;
+  transaccionCompra?: WompiTransaction | null;
+}
 
-  // Deliberadamente NO se filtra por emailCliente: el correo que Wompi guarda en
-  // la transaccion es el del checkout o el de la tarjeta, y no tiene por que
-  // coincidir con el que la marca escribio en nuestro formulario. Filtrar por el
-  // hacia que la busqueda no encontrara nada y fallara en silencio.
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const params = new URLSearchParams({
-      fechaInicio: day(since),
-      fechaFin: day(new Date(Date.now() + 86_400_000)),
-      cantidadPorPagina: String(PER_PAGE),
-      paginaActual: String(page),
-    });
-
-    let body: { resultado?: WompiTransaction[]; totalPaginas?: number };
-    try {
-      body = await api(`/TransaccionCompra?${params.toString()}`);
-    } catch (error) {
-      console.error("[wompi] no se pudo buscar la transaccion", error);
-      return null;
-    }
-
-    const rows = body?.resultado ?? [];
-    const match = rows.find(
-      (t) =>
-        t.idExterno === reference || t.identificadorEnlaceComercio === reference
+/**
+ * GET /EnlacePago/{id} — el enlace trae adjunta su transaccion.
+ *
+ * Es la unica forma fiable de ligar un cobro con una puja: el `idExterno` de la
+ * transaccion viene NULL para los pagos hechos por enlace, asi que buscar por
+ * referencia en /TransaccionCompra no encuentra nada. El enlace, en cambio,
+ * guarda nuestra referencia en `nombreEnlace` y la transaccion en
+ * `transaccionCompra`.
+ */
+export async function getPaymentLinkDetail(
+  linkId: number | string
+): Promise<PaymentLinkDetail | null> {
+  try {
+    return await api<PaymentLinkDetail>(
+      `/EnlacePago/${encodeURIComponent(String(linkId))}`
     );
-    if (match) return match;
-
-    if (rows.length < PER_PAGE) break;
-    if (body?.totalPaginas && page >= body.totalPaginas) break;
+  } catch (error) {
+    console.error("[wompi] no se pudo leer el enlace de pago", error);
+    return null;
   }
-
-  return null;
 }
 
 export type PaymentStatus = "approved" | "declined" | "pending";
@@ -281,8 +260,8 @@ export async function resolveEvent(
       | string
       | undefined;
     if (idEnlace !== undefined) {
-      const link = await getPaymentLink(idEnlace);
-      reference = link?.identificadorEnlaceComercio ?? null;
+      const link = await getPaymentLinkDetail(idEnlace);
+      reference = link?.nombreEnlace ?? null;
     }
   }
 

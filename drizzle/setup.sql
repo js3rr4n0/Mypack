@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS "webhook_events" (
 
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "needs_refund" boolean DEFAULT false;
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "settled_via" varchar(20);
+ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "wompi_link_id" varchar(50);
 -- Liquidación manual de una puja pagada.
 --
 -- Úsalo SOLO si tienes el correo de Wompi confirmando el cobro y la página

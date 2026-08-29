@@ -164,7 +164,7 @@ export async function POST(req: Request) {
     if (checkout.providerId) {
       await db
         .update(bids)
-        .set({ wompiTransactionId: checkout.providerId })
+        .set({ wompiLinkId: checkout.providerId })
         .where(eq(bids.wompiReference, reference));
     }
 

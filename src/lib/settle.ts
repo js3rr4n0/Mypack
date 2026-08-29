@@ -1,6 +1,6 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db, spots, bids } from "@/db";
-import { findTransactionByReference, type PaymentStatus } from "@/lib/wompi";
+import { getPaymentLinkDetail, type PaymentStatus } from "@/lib/wompi";
 
 /**
  * Liquidacion de una puja: la unica pieza que puede cambiar el dueno de una
@@ -110,9 +110,9 @@ export async function settleBid(
 export async function reconcileBid(reference: string): Promise<SettleResult> {
   const [row] = await db
     .select({
-      bidId: bids.id,
       status: bids.status,
-      createdAt: bids.createdAt,
+      linkId: bids.wompiLinkId,
+      legacyId: bids.wompiTransactionId,
     })
     .from(bids)
     .where(eq(bids.wompiReference, reference))
@@ -121,12 +121,22 @@ export async function reconcileBid(reference: string): Promise<SettleResult> {
   if (!row) return { outcome: "unknown_reference" };
   if (row.status !== "pending") return { outcome: "already_processed" };
 
-  const since = row.createdAt
-    ? new Date(row.createdAt.getTime() - 86_400_000)
-    : new Date(Date.now() - 7 * 86_400_000);
+  // Las pujas viejas guardaban el id del enlace en wompi_transaction_id.
+  const linkId = row.linkId ?? row.legacyId;
+  if (!linkId) return { outcome: "pending" };
 
-  const tx = await findTransactionByReference(reference, since);
+  const link = await getPaymentLinkDetail(linkId);
+  const tx = link?.transaccionCompra;
   if (!tx) return { outcome: "pending" };
+
+  // La referencia del enlace debe ser la nuestra: sin esta comprobacion, un id
+  // equivocado podria liquidar la puja de otra persona.
+  if (link?.nombreEnlace && link.nombreEnlace !== reference) {
+    console.error(
+      `[reconcile] el enlace ${linkId} es de "${link.nombreEnlace}", no de "${reference}"`
+    );
+    return { outcome: "pending" };
+  }
 
   const allowTest = process.env.WOMPI_ALLOW_TEST_TRANSACTIONS === "true";
   const usable = tx.esReal !== false || allowTest;
