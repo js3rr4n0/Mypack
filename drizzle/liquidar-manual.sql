@@ -4,10 +4,10 @@
 -- /thanks?ref=… sigue diciendo "Confirming your payment" — es decir, cuando
 -- ni el webhook ni la reconciliación automática lograron cerrarla.
 --
--- Cambia la referencia de la línea de abajo por la tuya y corre todo junto
--- en el SQL Editor de Neon.
-
-\set ref 'mypack-left_bottom-1788024934618-a70efa7b'
+-- Reemplaza la referencia en los TRES lugares donde aparece abajo por la tuya
+-- y corre todo junto en el SQL Editor de Neon.
+--
+-- (Antes usaba \set, que solo funciona en la terminal psql, no en Neon.)
 
 -- 1. Mirar qué hay antes de tocar nada.
 SELECT b.id, b.status, b.amount, b.previous_price, b.needs_refund,
@@ -16,7 +16,7 @@ SELECT b.id, b.status, b.amount, b.previous_price, b.needs_refund,
 FROM bids b
 JOIN spots s  ON s.id  = b.spot_id
 JOIN brands br ON br.id = b.brand_id
-WHERE b.wompi_reference = :'ref';
+WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA';
 
 -- 2. Liquidar: marca las pujas anteriores de esa zona como superadas,
 --    aprueba esta, y le entrega la zona a la marca.
@@ -24,7 +24,7 @@ WITH target AS (
   SELECT b.id, b.spot_id, b.brand_id,
          (COALESCE(b.previous_price, 0) + b.amount) AS new_price
   FROM bids b
-  WHERE b.wompi_reference = :'ref' AND b.status = 'pending'
+  WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA' AND b.status = 'pending'
 ),
 outbid AS (
   UPDATE bids SET is_outbid = true
@@ -48,5 +48,5 @@ WHERE s.id = (SELECT spot_id FROM target);
 SELECT s.name, br.name AS brand, s.current_price, b.status, b.settled_via
 FROM spots s
 JOIN brands br ON br.id = s.current_brand_id
-JOIN bids b    ON b.wompi_reference = :'ref'
+JOIN bids b    ON b.wompi_reference = 'PON-AQUI-TU-REFERENCIA'
 WHERE s.id = b.spot_id;
