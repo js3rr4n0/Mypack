@@ -36,14 +36,13 @@ export interface PackFrame {
 
 export const FRAMES: PackFrame[] = [
   {
-    // Perfil izquierdo. La mochila mira al otro lado que en 03, asi que las
-    // zonas caen en la mitad derecha del encuadre.
+    // Costado izquierdo, foto real: los tirantes quedan a la izquierda.
     src: "/pack/360/01.jpg",
     label: "Left side",
     zones: {
-      left_top: { x: 58, y: 28, w: 17, h: 6, rotate: 1, skew: 2 },
-      left_mid: { x: 60, y: 48, w: 16, h: 6, rotate: 1, skew: 2 },
-      left_bottom: { x: 62, y: 74, w: 17, h: 6, rotate: 1, skew: 2 },
+      left_top: { x: 53, y: 35.6, w: 18.3, h: 10.6, rotate: 1, skew: 1 },
+      left_mid: { x: 53, y: 47.2, w: 18.3, h: 10, rotate: 1, skew: 1 },
+      left_bottom: { x: 55.6, y: 78.4, w: 23.2, h: 20.6, rotate: 1, skew: 1 },
     },
   },
   {
@@ -51,18 +50,18 @@ export const FRAMES: PackFrame[] = [
     src: "/pack/360/02.jpg",
     label: "Front",
     zones: {
-      main_front: { x: 49, y: 50, w: 30, h: 10 },
-      front_pocket: { x: 49, y: 72, w: 24, h: 6 },
+      main_front: { x: 50.6, y: 46, w: 40.1, h: 22.4 },
+      front_pocket: { x: 50.6, y: 69.4, w: 40.1, h: 22.8 },
     },
   },
   {
-    // Perfil derecho.
+    // Costado derecho, foto real: los tirantes quedan a la derecha.
     src: "/pack/360/03.jpg",
     label: "Right side",
     zones: {
-      right_top: { x: 36, y: 28, w: 17, h: 6, rotate: -1, skew: -2 },
-      right_mid: { x: 38, y: 48, w: 16, h: 6, rotate: -1, skew: -2 },
-      right_bottom: { x: 39, y: 75, w: 17, h: 6, rotate: -1, skew: -2 },
+      right_top: { x: 46.9, y: 20.8, w: 16, h: 5.7, rotate: -1, skew: -1 },
+      right_mid: { x: 42, y: 66.4, w: 20.4, h: 9.2, rotate: -1, skew: -1 },
+      right_bottom: { x: 42.9, y: 80, w: 22.2, h: 6.9, rotate: -1, skew: -1 },
     },
   },
 ];

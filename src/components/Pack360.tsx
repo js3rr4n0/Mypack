@@ -171,16 +171,21 @@ export default function Pack360({
                     draggable={false}
                     className="max-h-full max-w-full rounded-[4px] object-contain"
                     style={{
-                      /* El logo tiene que parecer un parche cosido a la tela, no
-                         una imagen pegada encima:
+                      /* El logo tiene que parecer impreso sobre la tela, no
+                         pegado encima:
                          - drop-shadow respeta el alfa (box-shadow dibujaria una
                            caja tambien en los PNG transparentes);
                          - el redondeo convierte un logo con fondo opaco en una
                            etiqueta, y es invisible si el fondo es transparente;
-                         - brightness/contrast/saturate lo bajan a la luz de la
-                           foto, que es de estudio y apagada. */
+                         - brightness/contrast/saturate lo bajan a la luz de
+                           estudio de la foto, que es apagada;
+                         - el desenfoque de medio pixel imita como la tinta se
+                           asienta sobre un tejido, que nunca da un filo perfecto;
+                         - la opacidad justo por debajo de 1 deja ver la trama
+                           del cordura a traves del logo. */
                       filter:
-                        "drop-shadow(0 1px 2px rgba(0,0,0,.55)) brightness(.9) contrast(1.06) saturate(.92)",
+                        "drop-shadow(0 1px 2px rgba(0,0,0,.5)) brightness(.9) contrast(1.05) saturate(.93) blur(.3px)",
+                      opacity: 0.94,
                     }}
                   />
                 ) : (
