@@ -40,9 +40,9 @@ export const FRAMES: PackFrame[] = [
     src: "/pack/360/01.jpg",
     label: "Left side",
     zones: {
-      left_top: { x: 53, y: 35.6, w: 18.3, h: 10.6, rotate: 1, skew: 1 },
-      left_mid: { x: 53, y: 47.2, w: 18.3, h: 10, rotate: 1, skew: 1 },
-      left_bottom: { x: 55.6, y: 78.4, w: 23.2, h: 20.6, rotate: 1, skew: 1 },
+      left_top: { x: 53, y: 35.6, w: 18.3, h: 14.5, rotate: 1, skew: 1 },
+      left_mid: { x: 53, y: 49.5, w: 18.3, h: 14.5, rotate: 1, skew: 1 },
+      left_bottom: { x: 55.6, y: 76, w: 23.2, h: 20.6, rotate: 1, skew: 1 },
     },
   },
   {
@@ -59,9 +59,9 @@ export const FRAMES: PackFrame[] = [
     src: "/pack/360/03.jpg",
     label: "Right side",
     zones: {
-      right_top: { x: 46.9, y: 20.8, w: 16, h: 5.7, rotate: -1, skew: -1 },
-      right_mid: { x: 42, y: 66.4, w: 20.4, h: 9.2, rotate: -1, skew: -1 },
-      right_bottom: { x: 42.9, y: 80, w: 22.2, h: 6.9, rotate: -1, skew: -1 },
+      right_top: { x: 46.9, y: 23, w: 16, h: 12, rotate: -1, skew: -1 },
+      right_mid: { x: 42, y: 65, w: 20.4, h: 15.5, rotate: -1, skew: -1 },
+      right_bottom: { x: 42.9, y: 82, w: 22.2, h: 14, rotate: -1, skew: -1 },
     },
   },
 ];

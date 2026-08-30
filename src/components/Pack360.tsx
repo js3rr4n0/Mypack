@@ -169,7 +169,7 @@ export default function Pack360({
                     src={brand.logo}
                     alt={brand.name}
                     draggable={false}
-                    className="max-h-full max-w-full rounded-[4px] object-contain"
+                    className="h-full w-full rounded-[4px] object-contain"
                     style={{
                       /* El logo tiene que parecer impreso sobre la tela, no
                          pegado encima:
