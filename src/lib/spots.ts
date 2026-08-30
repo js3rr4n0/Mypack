@@ -35,9 +35,9 @@ export const SPOTS: SpotConfig[] = [
     positionOrder: 1,
     minBid: 7_500,
     premium: true,
-    hotspot: [0, 0.13, 0.21],
+    hotspot: [0, 0.15, 0.21],
     face: "front",
-    size: [0.26, 0.16],
+    size: [0.34, 0.26],
   },
   {
     name: "front_pocket",
@@ -46,9 +46,9 @@ export const SPOTS: SpotConfig[] = [
     positionOrder: 2,
     minBid: 3_000,
     premium: false,
-    hotspot: [0, -0.13, 0.21],
+    hotspot: [0, -0.15, 0.21],
     face: "front",
-    size: [0.26, 0.16],
+    size: [0.34, 0.26],
   },
 
   // --- Lateral izquierdo (tres franjas) ---
@@ -61,7 +61,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [-0.325, 0.3, 0],
     face: "left",
-    size: [0.15, 0.1],
+    size: [0.19, 0.18],
   },
   {
     name: "left_mid",
@@ -72,7 +72,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [-0.325, 0.03, 0],
     face: "left",
-    size: [0.15, 0.1],
+    size: [0.19, 0.18],
   },
   {
     name: "left_bottom",
@@ -85,7 +85,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [-0.325, -0.25, 0],
     face: "left",
-    size: [0.15, 0.09],
+    size: [0.19, 0.18],
   },
 
   // --- Lateral derecho (tres franjas) ---
@@ -98,7 +98,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [0.325, 0.3, 0],
     face: "right",
-    size: [0.15, 0.1],
+    size: [0.19, 0.18],
   },
   {
     name: "right_mid",
@@ -109,7 +109,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [0.325, 0.03, 0],
     face: "right",
-    size: [0.15, 0.1],
+    size: [0.19, 0.18],
   },
   {
     name: "right_bottom",
@@ -120,7 +120,7 @@ export const SPOTS: SpotConfig[] = [
     premium: false,
     hotspot: [0.325, -0.25, 0],
     face: "right",
-    size: [0.15, 0.09],
+    size: [0.19, 0.18],
   },
 ];
 
