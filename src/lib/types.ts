@@ -21,3 +21,10 @@ export interface SpotView {
   nextBid: number;
   brand: BrandView | null;
 }
+
+export interface RecentClaim {
+  spot: string | null;
+  brand: string | null;
+  amount: number | null;
+  at: string | Date | null;
+}

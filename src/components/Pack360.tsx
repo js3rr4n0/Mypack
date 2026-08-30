@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FRAMES, FRAME_RATIO } from "@/lib/pack-frames";
-import { formatMoney } from "@/lib/spots";
+import { BidPrice } from "./BidPrice";
 import type { SpotView } from "@/lib/types";
 
 /**
@@ -233,10 +233,8 @@ export default function Pack360({
             onClick={() => onSelect?.(s.name)}
             className="rounded-lg border border-white/10 bg-white/[0.03] p-2 text-left transition hover:border-lime/50"
           >
-            <p className="truncate text-white/50">{s.displayName}</p>
-            <p className="font-semibold text-white">
-              {s.brand?.name ?? formatMoney(s.nextBid)}
-            </p>
+            <p className="mb-1 truncate text-white/50">{s.displayName}</p>
+            <BidPrice spot={s} size="sm" />
           </button>
         ))}
       </div>

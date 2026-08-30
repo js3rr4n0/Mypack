@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { formatMoney } from "@/lib/spots";
 import { instagramUrl, prettyDomain, safeUrl, twitterUrl } from "@/lib/links";
-import type { SpotView } from "@/lib/types";
+import { BidPrice, SpotStatus } from "./BidPrice";
+import type { RecentClaim, SpotView } from "@/lib/types";
 
 /**
  * Visitas reales al sitio, contadas contra la base de datos.
@@ -60,37 +61,80 @@ export function HowItWorks() {
   const steps = [
     {
       n: "01",
-      title: "Pick your spot",
-      body: "Spin the pack, look over the eight available spots, and choose where your logo lives.",
+      title: "Choose a spot",
+      body: "Pick where you want your logo on the backpack. Eight spots, each with its own price.",
     },
     {
       n: "02",
-      title: "Upload your logo and pay",
-      body: "High-res PNG or SVG. You pay the current price plus the minimum increment, through Wompi.",
+      title: "Place your bid",
+      body: "Pay the current bid plus the minimum increment — or more, if you want to make it harder to take from you.",
     },
     {
       n: "03",
-      title: "I walk with your brand",
-      body: "The moment the payment clears, your logo goes on the pack and hits the street with me every day.",
+      title: "Own the spot",
+      body: "Your logo goes up as soon as the payment clears, and stays there until another brand outbids you.",
+    },
+    {
+      n: "04",
+      title: "Get seen across El Salvador",
+      body: "Your logo travels with me every day, all over El Salvador — the bus, the office, the queue for coffee.",
     },
   ];
 
   return (
-    <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
-      <h2 className="font-display text-3xl font-bold sm:text-5xl">How it works</h2>
-      <div className="mt-10 grid gap-5 sm:grid-cols-3">
+    <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+      <h2 className="font-display text-3xl font-bold sm:text-4xl">
+        How the auction works
+      </h2>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((s) => (
           <div
             key={s.n}
-            className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-lime/40"
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition hover:border-lime/40"
           >
-            <span className="font-display text-4xl font-bold text-lime/25">{s.n}</span>
-            <h3 className="mt-4 font-display text-lg font-semibold">{s.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-white/55">{s.body}</p>
+            <span className="font-display text-2xl font-bold text-lime/30">{s.n}</span>
+            <h3 className="mt-3 font-display text-base font-semibold">{s.title}</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-white/55">{s.body}</p>
           </div>
         ))}
       </div>
     </section>
+  );
+}
+
+/** Ultimas zonas reclamadas. Si no hay ninguna, no se renderiza nada. */
+export function RecentActivity({ recent }: { recent: RecentClaim[] }) {
+  if (!recent.length) return null;
+
+  const cuando = (at: RecentClaim["at"]) => {
+    if (!at) return "";
+    const mins = Math.floor((Date.now() - new Date(at).getTime()) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const h = Math.floor(mins / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  };
+
+  return (
+    <div className="mx-auto max-w-4xl px-5">
+      <ul className="flex flex-wrap justify-center gap-2">
+        {recent.map((r, i) => (
+          <li
+            key={`${r.spot}-${i}`}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs text-white/55"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+            <span className="text-white/80">{r.brand}</span> claimed{" "}
+            <span className="text-white/80">{r.spot}</span>
+            {r.amount ? (
+              <span className="text-lime">{formatMoney(r.amount)}</span>
+            ) : null}
+            <span className="text-white/30">{cuando(r.at)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -103,102 +147,111 @@ export function Leaderboard({
   onSelect: (name: string) => void;
   onOutbid: (name: string) => void;
 }) {
+  const libres = spots.filter((s) => !s.brand).length;
   const ranked = [...spots].sort((a, b) => b.currentPrice - a.currentPrice);
 
   return (
-    <section id="leaderboard" className="mx-auto max-w-4xl px-5 py-20 sm:py-28">
-      <div className="flex items-end justify-between gap-4">
-        <h2 className="font-display text-3xl font-bold sm:text-5xl">Leaderboard</h2>
-        <p className="text-sm text-white/40">Who's walking with me</p>
-      </div>
+    <section id="leaderboard" className="mx-auto max-w-4xl px-5 py-16 sm:py-24">
+      <h2 className="font-display text-3xl font-bold sm:text-4xl">
+        {spots.length} advertising spots. That&apos;s it.
+      </h2>
+      <p className="mt-3 max-w-lg text-white/55">
+        There is one backpack and it has {spots.length} surfaces.{" "}
+        {libres > 0 ? (
+          <>
+            <span className="text-lime">{libres}</span>{" "}
+            {libres === 1 ? "is" : "are"} still open. Once a spot is taken, the
+            only way in is to outbid whoever holds it.
+          </>
+        ) : (
+          <>All of them are taken. The only way in is to outbid someone.</>
+        )}
+      </p>
 
-      <div className="mt-8 divide-y divide-white/5 overflow-hidden rounded-3xl border border-white/10">
-        {ranked.map((s, i) => {
-          const site = safeUrl(s.brand?.website);
-          const domain = prettyDomain(s.brand?.website);
-          const x = twitterUrl(s.brand?.twitter);
-          const ig = instagramUrl(s.brand?.instagram);
+      <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
+        <div className="hidden grid-cols-[1fr_auto_auto] gap-4 border-b border-white/10 bg-white/[0.03] px-5 py-3 text-[11px] uppercase tracking-wider text-white/35 sm:grid">
+          <span>Spot</span>
+          <span className="text-right">Current bid</span>
+          <span className="text-right">Status</span>
+        </div>
 
-          return (
-            <div
-              key={s.name}
-              className="flex items-center gap-4 bg-white/[0.02] px-4 py-4 transition hover:bg-white/[0.04] sm:px-6"
-            >
-              <span className="w-6 font-display text-sm text-white/30">{i + 1}</span>
+        <div className="divide-y divide-white/5">
+          {ranked.map((s) => {
+            const site = safeUrl(s.brand?.website);
+            const x = twitterUrl(s.brand?.twitter);
+            const ig = instagramUrl(s.brand?.instagram);
 
-              <button
-                onClick={() => onSelect(s.name)}
-                aria-label={s.brand ? s.brand.name : s.displayName}
-                className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black transition hover:border-lime/50"
+            return (
+              <div
+                key={s.name}
+                className="grid grid-cols-[1fr_auto] items-center gap-4 bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04] sm:grid-cols-[1fr_auto_auto]"
               >
-                {s.brand?.logo ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={s.brand.logo} alt={s.brand.name} className="h-8 w-8 object-contain" />
-                ) : (
-                  <span className="text-lg text-white/20">+</span>
-                )}
-              </button>
-
-              <div className="min-w-0 flex-1">
-                {/* El enlace de la marca es justo lo que compro: tiene que
-                    poder abrirse, no solo mirarse. */}
-                {site ? (
-                  <a
-                    href={site}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="truncate font-semibold transition hover:text-lime"
-                  >
-                    {s.brand?.name} <span className="text-white/30">↗</span>
-                  </a>
-                ) : (
+                <div className="flex min-w-0 items-center gap-3">
                   <button
                     onClick={() => onSelect(s.name)}
-                    className="block truncate font-semibold"
+                    aria-label={s.brand ? s.brand.name : s.displayName}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black transition hover:border-lime/50"
                   >
-                    {s.brand?.name ?? <span className="text-white/35">Available</span>}
+                    {s.brand?.logo ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={s.brand.logo}
+                        alt={s.brand.name}
+                        className="h-7 w-7 object-contain"
+                      />
+                    ) : (
+                      <span className="text-lg text-white/20">+</span>
+                    )}
                   </button>
-                )}
 
-                <div className="flex items-center gap-2 text-xs text-white/40">
-                  <span className="truncate">{s.displayName}</span>
-                  {domain && <span className="hidden truncate sm:inline">· {domain}</span>}
-                  {x && (
-                    <a
-                      href={x}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="transition hover:text-lime"
-                      aria-label={`${s.brand?.name} on X`}
-                    >
-                      𝕏
-                    </a>
-                  )}
-                  {ig && (
-                    <a
-                      href={ig}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="transition hover:text-lime"
-                      aria-label={`${s.brand?.name} on Instagram`}
-                    >
-                      ◎
-                    </a>
-                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{s.displayName}</p>
+                    <div className="flex items-center gap-2 text-xs text-white/40">
+                      {s.brand ? (
+                        site ? (
+                          <a
+                            href={site}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="truncate transition hover:text-lime"
+                          >
+                            {s.brand.name} <span className="text-white/25">↗</span>
+                          </a>
+                        ) : (
+                          <span className="truncate">{s.brand.name}</span>
+                        )
+                      ) : (
+                        <span>Nobody has claimed this one</span>
+                      )}
+                      {x && (
+                        <a href={x} target="_blank" rel="noopener noreferrer nofollow"
+                           className="transition hover:text-lime" aria-label="X">𝕏</a>
+                      )}
+                      {ig && (
+                        <a href={ig} target="_blank" rel="noopener noreferrer nofollow"
+                           className="transition hover:text-lime" aria-label="Instagram">◎</a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right sm:min-w-[120px]">
+                  <BidPrice spot={s} size="sm" />
+                </div>
+
+                <div className="col-span-2 flex items-center justify-between gap-3 sm:col-span-1 sm:justify-end">
+                  <SpotStatus spot={s} />
+                  <button
+                    onClick={() => onOutbid(s.name)}
+                    className="rounded-full bg-lime px-4 py-1.5 text-xs font-bold text-black transition hover:bg-neon"
+                  >
+                    {s.brand ? "Outbid" : "Claim"}
+                  </button>
                 </div>
               </div>
-
-              <button onClick={() => onOutbid(s.name)} className="shrink-0 text-right">
-                <p className="font-display font-bold">
-                  {s.currentPrice > 0 ? formatMoney(s.currentPrice) : formatMoney(s.minBid)}
-                </p>
-                <p className="text-[11px] uppercase tracking-wider text-lime">
-                  {s.brand ? "Outbid" : "Open"}
-                </p>
-              </button>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -216,7 +269,7 @@ export function FAQ() {
     },
     {
       q: "How do I know you actually carry the pack?",
-      a: "I post photos and locations every week on the project's socials. I walk San Salvador every day — that's the whole point of this.",
+      a: "I post photos and locations every week on the project's socials. I'm out across El Salvador every day — that's the whole point of this.",
     },
     {
       q: "How do I pay?",
@@ -256,7 +309,7 @@ export function Footer() {
     <footer className="border-t border-white/5 px-5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-white/35 sm:flex-row">
         <p className="font-display font-semibold text-white/70">mypack.lol</p>
-        <p>A walking billboard in San Salvador. Payments secured by Wompi.</p>
+        <p>A walking billboard across El Salvador. Payments secured by Wompi.</p>
         <p>© {new Date().getFullYear()}</p>
       </div>
     </footer>

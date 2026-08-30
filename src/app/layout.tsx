@@ -19,10 +19,10 @@ export const metadata: Metadata = {
     template: "%s — mypack.lol",
   },
   description:
-    "I'm a walking billboard. Your logo walks the city with me every single day. Eight spots on my backpack, open to the highest bidder.",
+    "I'm a walking billboard. Your logo travels El Salvador with me, every single day. Eight spots on my backpack, open to the highest bidder.",
   openGraph: {
     title: "My Pack. Your Brand.",
-    description: "Your logo walks the city with me every single day.",
+    description: "Your logo travels El Salvador with me, every single day.",
     url: siteUrl(),
     siteName: "mypack.lol",
     locale: "en_US",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "My Pack. Your Brand.",
-    description: "Your logo walks the city with me every single day.",
+    description: "Your logo travels El Salvador with me, every single day.",
   },
 };
 

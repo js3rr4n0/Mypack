@@ -6,9 +6,16 @@ import BidModal from "./BidModal";
 import BrandPopup from "./BrandPopup";
 import CanvasBoundary from "./CanvasBoundary";
 import Pack360 from "./Pack360";
-import { FAQ, Footer, HowItWorks, Leaderboard, VisitCounter } from "./Sections";
+import {
+  FAQ,
+  Footer,
+  HowItWorks,
+  Leaderboard,
+  RecentActivity,
+  VisitCounter,
+} from "./Sections";
 import { SPOTS, formatMoney, type SpotName } from "@/lib/spots";
-import type { SpotView } from "@/lib/types";
+import type { RecentClaim, SpotView } from "@/lib/types";
 
 const Backpack3D = dynamic(() => import("./Backpack3D"), {
   ssr: false,
@@ -36,13 +43,16 @@ export default function Landing() {
   const [spots, setSpots] = useState<SpotView[]>(FALLBACK);
   const [selected, setSelected] = useState<SpotName | null>(null);
   const [viewing, setViewing] = useState<SpotName | null>(null);
+  const [recent, setRecent] = useState<RecentClaim[]>([]);
 
   useEffect(() => {
     let alive = true;
     fetch("/api/spots")
       .then((r) => r.json())
       .then((json) => {
-        if (alive && Array.isArray(json.spots)) setSpots(json.spots);
+        if (!alive) return;
+        if (Array.isArray(json.spots)) setSpots(json.spots);
+        if (Array.isArray(json.recent)) setRecent(json.recent);
       })
       .catch(() => {});
     return () => {
@@ -116,7 +126,7 @@ export default function Landing() {
         <div className="relative mx-auto max-w-4xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/55">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime" />
-            Live auction · 8 spots
+            Live auction · {spots.length} spots · once taken, taken
           </span>
 
           <h1 className="mt-7 font-display text-[13vw] font-bold leading-[0.92] tracking-tight sm:text-7xl lg:text-8xl">
@@ -126,7 +136,7 @@ export default function Landing() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/55 sm:text-lg">
-            Your logo walks the city with me every single day.
+            Your logo travels El Salvador with me, every single day.
           </p>
 
           <VisitCounter />
@@ -152,8 +162,14 @@ export default function Landing() {
         </div>
       </header>
 
+      <div className="mt-10">
+        <RecentActivity recent={recent} />
+      </div>
+
+      <HowItWorks />
+
       {/* 3D pack */}
-      <section id="mochila" className="mt-10 sm:mt-16">
+      <section id="mochila" className="mt-2 sm:mt-6">
         <CanvasBoundary
           fallback={
             <div className="flex h-[70vh] min-h-[420px] flex-col items-center justify-center gap-3 px-6 text-center">
@@ -219,7 +235,6 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
         </div>
       </section>
 
-      <HowItWorks />
       <Leaderboard spots={spots} onSelect={open} onOutbid={bid} />
       <FAQ />
 
