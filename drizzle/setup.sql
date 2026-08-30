@@ -209,7 +209,7 @@ VALUES
   ('main_front', 'Front Panel', 'The billboard. The biggest panel, and the one that spends the most time at eye level.', 1, 7500),
   ('front_pocket', 'Front Pocket', 'Right below the main panel, dead center of the front.', 2, 3000),
   ('left_top', 'Left Side · Top', 'Shoulder height. The first thing you see walking past me.', 3, 2500),
-  ('left_mid', 'Left Side · Middle', 'Dead center of the flank. On show all day in the bus and the elevator.', 4, 2000),
+  ('left_mid', 'Left Side · Middle', 'Dead center of the flank. On show all day in the bus and the elevator.', 4, 100),
   ('left_bottom', 'Left Side · Bottom', 'On the MOLLE, next to the bottle pocket.', 5, 100),
   ('right_top', 'Right Side · Top', 'Shoulder height, on the street side.', 6, 2500),
   ('right_mid', 'Right Side · Middle', 'Center of the right flank. In full view on the sidewalk.', 7, 2000),

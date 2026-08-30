@@ -68,7 +68,9 @@ export const SPOTS: SpotConfig[] = [
     displayName: "Left Side · Middle",
     description: "Dead center of the flank. On show all day in the bus and the elevator.",
     positionOrder: 4,
-    minBid: 2_000,
+    // Precio de prueba: $1 para hacer otro pago real de punta a punta.
+    // Subir a 2_000 ($20) cuando la prueba este hecha.
+    minBid: 100,
     premium: false,
     hotspot: [-0.325, 0.03, 0],
     face: "left",
