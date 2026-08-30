@@ -77,7 +77,7 @@ export function HowItWorks() {
     {
       n: "04",
       title: "Get seen across El Salvador",
-      body: "Your logo travels with me every day, all over El Salvador — the bus, the office, the queue for coffee.",
+      body: "Your logo travels with me every day, all over El Salvador — and I post photos of it out there every week, so you can see what you paid for.",
     },
   ];
 
@@ -264,12 +264,12 @@ export function FAQ() {
       a: "$1 is the opening bid, not the price. It is the floor that gets the auction started. To take a spot that someone already holds you have to outbid them, so what a spot really costs is whatever the last brand was willing to pay for it.",
     },
     {
-      q: "What actually goes on the backpack?",
-      a: "Right now, a printed vinyl decal. As a spot's price grows it upgrades to a heat-transfer patch, which is the proper job — it survives washing and does not lift at the edges. Same logo, same place; the higher the bid, the better the physical treatment.",
+      q: "What do I get for my bid?",
+      a: "Your logo on that spot of my backpack, carried every day across El Salvador, plus weekly photos of it out in the real world. You also get your link on the leaderboard for as long as you hold the spot.",
     },
     {
-      q: "How does it hold up in the rain?",
-      a: "A decal takes rain fine but wears with friction over months, so I replace it when it starts to look tired, for as long as you hold the spot. A heat-transfer patch does not have that problem, which is why spots move up to one as their price grows.",
+      q: "How does it hold up out there?",
+      a: "It's a backpack in daily use, so things wear. If your logo starts looking tired I redo it, at no extra cost, for as long as you hold the spot. Keeping it looking good is my job, not yours.",
     },
     {
       q: "Why only 8 spots?",

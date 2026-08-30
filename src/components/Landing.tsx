@@ -215,15 +215,16 @@ Your browser couldn&apos;t load the 3D pack. You can still see it in
               Here&apos;s how your logo would look
             </h2>
             <p className="mt-5 max-w-md leading-relaxed text-white/55">
-              Printed properly onto black cordura. No cheap stickers: patches and
-              heat-transfer vinyl that survive rain, crowded buses, and five kilometers
-              a day on foot.
+              Your logo goes on that spot and rides with me every day — the bus,
+              the office, five kilometers on foot. Every week I post photos of it
+              out there, so you can see what you paid for.
             </p>
             <ul className="mt-7 space-y-3 text-sm text-white/60">
               {[
-                "High-resolution logo, PNG or SVG",
-                "Weekly photos of the pack out on the street",
+                "Your logo on the spot you picked, carried daily",
+                "Weekly photos of the pack out in the real world",
                 "Your link on the leaderboard for as long as you hold the spot",
+                "If it wears, I redo it — no extra cost",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-lime" />
