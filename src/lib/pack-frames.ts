@@ -36,34 +36,32 @@ export interface PackFrame {
 
 export const FRAMES: PackFrame[] = [
   {
-    // Frente en tres cuartos: se ve el panel frontal y el costado izquierdo.
+    // Perfil izquierdo: se ve el costado completo, no el panel frontal.
     src: "/pack/360/01.jpg",
     label: "Left side",
     zones: {
-      main_front: { x: 28, y: 51, w: 24, h: 8, rotate: 8, skew: 6, opacity: 0.95 },
-      left_top: { x: 62, y: 42, w: 13, h: 5.5, rotate: -3, skew: -4 },
-      left_mid: { x: 63, y: 54, w: 13, h: 5.5, rotate: -3, skew: -4 },
-      left_bottom: { x: 68, y: 66, w: 12, h: 5, rotate: -3, skew: -4 },
+      left_top: { x: 30, y: 37, w: 17, h: 6, rotate: 2, skew: 2 },
+      left_mid: { x: 38, y: 46, w: 16, h: 6, rotate: 2, skew: 2 },
+      left_bottom: { x: 37, y: 69, w: 17, h: 6, rotate: 2, skew: 2 },
     },
   },
   {
-    // Frente plano: el panel frontal a tamano completo.
+    // Frente plano.
     src: "/pack/360/02.jpg",
     label: "Front",
     zones: {
-      main_front: { x: 50, y: 49, w: 28, h: 10 },
-      front_pocket: { x: 50, y: 66, w: 20, h: 5.5 },
+      main_front: { x: 49, y: 50, w: 30, h: 10 },
+      front_pocket: { x: 49, y: 72, w: 24, h: 6 },
     },
   },
   {
-    // Tres cuartos del otro lado: panel frontal y costado derecho.
+    // Perfil derecho.
     src: "/pack/360/03.jpg",
     label: "Right side",
     zones: {
-      right_top: { x: 39, y: 33, w: 14, h: 5.5, rotate: -6, skew: -5 },
-      right_mid: { x: 39, y: 51, w: 14, h: 5.5, rotate: -6, skew: -5 },
-      right_bottom: { x: 39, y: 61, w: 14, h: 5.5, rotate: -6, skew: -5 },
-      main_front: { x: 75, y: 49, w: 23, h: 8, rotate: 6, skew: 5, opacity: 0.95 },
+      right_top: { x: 36, y: 28, w: 17, h: 6, rotate: -1, skew: -2 },
+      right_mid: { x: 38, y: 48, w: 16, h: 6, rotate: -1, skew: -2 },
+      right_bottom: { x: 39, y: 75, w: 17, h: 6, rotate: -1, skew: -2 },
     },
   },
 ];
