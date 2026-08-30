@@ -12,7 +12,12 @@ const display = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: "My Pack. Your Brand. — mypack.lol",
+  // La pestana se corta por la derecha: el nombre va primero, que es lo unico
+  // que se lee cuando hay muchas pestanas abiertas.
+  title: {
+    default: "mypack.lol — My Pack. Your Brand.",
+    template: "%s — mypack.lol",
+  },
   description:
     "I'm a walking billboard. Your logo walks the city with me every single day. Eight spots on my backpack, open to the highest bidder.",
   openGraph: {
