@@ -157,7 +157,8 @@ export default function Landing() {
           </div>
 
           <p className="mt-4 text-xs text-white/30">
-            From {formatMoney(cheapest?.nextBid ?? 0)} · secure payment via Wompi
+            Bidding starts at {formatMoney(cheapest?.nextBid ?? 0)} — the auction
+            sets the rest. Secure payment via Wompi.
           </p>
         </div>
       </header>

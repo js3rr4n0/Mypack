@@ -67,7 +67,7 @@ export function HowItWorks() {
     {
       n: "02",
       title: "Place your bid",
-      body: "Pay the current bid plus the minimum increment — or more, if you want to make it harder to take from you.",
+      body: "The minimum is a floor, not a price. Pay it, or bid higher to make the spot harder to take from you.",
     },
     {
       n: "03",
@@ -260,12 +260,28 @@ export function Leaderboard({
 export function FAQ() {
   const items = [
     {
+      q: "Is $1 really the price?",
+      a: "$1 is the opening bid, not the price. It is the floor that gets the auction started. To take a spot that someone already holds you have to outbid them, so what a spot really costs is whatever the last brand was willing to pay for it.",
+    },
+    {
+      q: "What actually goes on the backpack?",
+      a: "Right now, a printed vinyl decal. As a spot's price grows it upgrades to a heat-transfer patch, which is the proper job — it survives washing and does not lift at the edges. Same logo, same place; the higher the bid, the better the physical treatment.",
+    },
+    {
+      q: "How does it hold up in the rain?",
+      a: "A decal takes rain fine but wears with friction over months, so I replace it when it starts to look tired, for as long as you hold the spot. A heat-transfer patch does not have that problem, which is why spots move up to one as their price grows.",
+    },
+    {
+      q: "Why only 8 spots?",
+      a: "Because that is the product. There is one backpack, and it has eight surfaces worth looking at. If there were forty, nobody would need to outbid anybody, and the whole thing would just be cheap stickers.",
+    },
+    {
       q: "How long does my logo stay on the pack?",
       a: "Until another brand pays more for that spot. If you get outbid I'll email you, and you can take it back by paying only the difference.",
     },
     {
       q: "What format should the logo be?",
-      a: "PNG with a transparent background, or SVG, up to 5MB. The higher the resolution, the better it prints.",
+      a: "PNG with a transparent background, or SVG, up to 5MB. The higher the resolution, the better it prints. Light logos read much better than dark ones — the pack is black.",
     },
     {
       q: "How do I know you actually carry the pack?",
@@ -282,8 +298,8 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="mx-auto max-w-3xl px-5 py-20 sm:py-28">
-      <h2 className="font-display text-3xl font-bold sm:text-5xl">FAQ</h2>
+    <section id="faq" className="mx-auto max-w-3xl px-5 py-16 sm:py-24">
+      <h2 className="font-display text-3xl font-bold sm:text-4xl">FAQ</h2>
       <div className="mt-8 space-y-3">
         {items.map((item) => (
           <details
