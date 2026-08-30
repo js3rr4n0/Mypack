@@ -36,13 +36,14 @@ export interface PackFrame {
 
 export const FRAMES: PackFrame[] = [
   {
-    // Perfil izquierdo: se ve el costado completo, no el panel frontal.
+    // Perfil izquierdo. La mochila mira al otro lado que en 03, asi que las
+    // zonas caen en la mitad derecha del encuadre.
     src: "/pack/360/01.jpg",
     label: "Left side",
     zones: {
-      left_top: { x: 30, y: 37, w: 17, h: 6, rotate: 2, skew: 2 },
-      left_mid: { x: 38, y: 46, w: 16, h: 6, rotate: 2, skew: 2 },
-      left_bottom: { x: 37, y: 69, w: 17, h: 6, rotate: 2, skew: 2 },
+      left_top: { x: 58, y: 28, w: 17, h: 6, rotate: 1, skew: 2 },
+      left_mid: { x: 60, y: 48, w: 16, h: 6, rotate: 1, skew: 2 },
+      left_bottom: { x: 62, y: 74, w: 17, h: 6, rotate: 1, skew: 2 },
     },
   },
   {
