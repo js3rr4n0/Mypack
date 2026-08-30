@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS "webhook_events" (
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "needs_refund" boolean DEFAULT false;
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "settled_via" varchar(20);
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "wompi_link_id" varchar(50);
+ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "bid_price" integer;
 -- Liquidación manual de una puja ya pagada.
 --
 -- Úsalo solo si tienes el correo de Wompi confirmando el cobro y la página
@@ -206,14 +207,14 @@ SELECT '6. VISITAS' AS bloque, count(*) AS total FROM visits;
 -- Las 6 zonas de la mochila. min_bid va en centavos de USD.
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES
-  ('main_front', 'Front Panel', 'The billboard. The biggest panel, and the one that spends the most time at eye level.', 1, 7500),
-  ('front_pocket', 'Front Pocket', 'Right below the main panel, dead center of the front.', 2, 3000),
-  ('left_top', 'Left Side · Top', 'Shoulder height. The first thing you see walking past me.', 3, 2500),
+  ('main_front', 'Front Panel', 'The billboard. The biggest panel, and the one that spends the most time at eye level.', 1, 100),
+  ('front_pocket', 'Front Pocket', 'Right below the main panel, dead center of the front.', 2, 100),
+  ('left_top', 'Left Side · Top', 'Shoulder height. The first thing you see walking past me.', 3, 100),
   ('left_mid', 'Left Side · Middle', 'Dead center of the flank. On show all day in the bus and the elevator.', 4, 100),
   ('left_bottom', 'Left Side · Bottom', 'On the MOLLE, next to the bottle pocket.', 5, 100),
-  ('right_top', 'Right Side · Top', 'Shoulder height, on the street side.', 6, 2500),
-  ('right_mid', 'Right Side · Middle', 'Center of the right flank. In full view on the sidewalk.', 7, 2000),
-  ('right_bottom', 'Right Side · Bottom', 'On the MOLLE, bottle-pocket side.', 8, 1800)
+  ('right_top', 'Right Side · Top', 'Shoulder height, on the street side.', 6, 100),
+  ('right_mid', 'Right Side · Middle', 'Center of the right flank. In full view on the sidewalk.', 7, 100),
+  ('right_bottom', 'Right Side · Bottom', 'On the MOLLE, bottle-pocket side.', 8, 100)
 ON CONFLICT ("name") DO UPDATE SET
   "display_name" = EXCLUDED."display_name",
   "description" = EXCLUDED."description",

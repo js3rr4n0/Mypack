@@ -90,7 +90,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const target = nextBidAmount(spot.currentPrice, spot.minBid);
+    // Piso: lo minimo que hay que pagar por esta zona ahora mismo. Se calcula
+    // aqui y no se acepta del cliente, que podria mandar cualquier numero.
+    const floor = nextBidAmount(spot.currentPrice, spot.minBid);
+
+    // La marca puede pujar mas si quiere. Se admite un monto en centavos.
+    const chosen =
+      typeof payload.amount === "number" && Number.isFinite(payload.amount)
+        ? Math.round(payload.amount)
+        : floor;
+
+    if (chosen < floor) {
+      return NextResponse.json(
+        { error: `The minimum for this spot is ${formatMoney(floor)}.`, floor },
+        { status: 400 }
+      );
+    }
+    if (chosen > 100_000_00) {
+      return NextResponse.json(
+        { error: "That amount is too large." },
+        { status: 400 }
+      );
+    }
+
+    const target = chosen;
 
     // Marca: se reutiliza por email + nombre, y se actualiza el logo.
     const [existingBrand] = await db
@@ -145,6 +168,7 @@ export async function POST(req: Request) {
       spotId: spot.id,
       brandId: brand.id,
       amount,
+      bidPrice: target,
       previousPrice: spot.currentPrice,
       wompiReference: reference,
       status: "pending",
@@ -173,6 +197,7 @@ export async function POST(req: Request) {
       amount,
       credit,
       newPrice: target,
+      floor,
       amountLabel: formatMoney(amount),
       checkoutUrl: checkout.url,
     });

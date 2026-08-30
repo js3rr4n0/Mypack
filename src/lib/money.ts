@@ -5,7 +5,7 @@
 export const CURRENCY = "USD";
 
 /** Incremento minimo para superar una puja, en centavos. */
-export const MIN_INCREMENT = 500; // $5.00
+export const MIN_INCREMENT = 100; // $1.00
 
 export function formatMoney(cents: number): string {
   return new Intl.NumberFormat("en-US", {

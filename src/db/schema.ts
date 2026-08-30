@@ -45,7 +45,14 @@ export const bids = pgTable("bids", {
   brandId: integer("brand_id")
     .references(() => brands.id)
     .notNull(),
+  /** lo que se le cobra a la marca en esta transaccion */
   amount: integer("amount").notNull(),
+  /**
+   * Precio al que queda la zona si el pago se aprueba. Se guarda aparte porque
+   * no siempre coincide con `amount`: una marca que regresa a una zona que ya
+   * ocupaba paga solo la diferencia, y ahora cada quien elige cuanto pujar.
+   */
+  bidPrice: integer("bid_price"),
   previousPrice: integer("previous_price"),
   isOutbid: boolean("is_outbid").default(false),
   wompiTransactionId: varchar("wompi_transaction_id", { length: 100 }),

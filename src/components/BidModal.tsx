@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatMoney, MIN_INCREMENT } from "@/lib/spots";
+import { formatMoney } from "@/lib/spots";
 import {
   removeFlatBackground,
   hasFlatBackground,
@@ -34,7 +34,13 @@ export default function BidModal({ spot, onClose }: Props) {
   const [tooDark, setTooDark] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Monto elegido, en dolares. Se inicializa con el minimo de la zona.
+  const [amount, setAmount] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (spot) setAmount((spot.nextBid / 100).toFixed(2));
+  }, [spot]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -107,6 +113,13 @@ export default function BidModal({ spot, onClose }: Props) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const cents = Math.round(parseFloat(amount.replace(",", ".")) * 100);
+    if (!Number.isFinite(cents) || cents < spot!.nextBid) {
+      setError(`The minimum for this spot is ${formatMoney(spot!.nextBid)}.`);
+      return;
+    }
+
     setSubmitting(true);
     try {
       let uploadedUrl: string | null = null;
@@ -128,6 +141,7 @@ export default function BidModal({ spot, onClose }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           spot: spot!.name,
+          amount: cents,
           brandName,
           email,
           website,
@@ -181,18 +195,30 @@ export default function BidModal({ spot, onClose }: Props) {
               {spot.currentPrice > 0 ? formatMoney(spot.currentPrice) : "—"}
             </span>
           </div>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-white/50 text-sm">You pay</span>
-            <span className="font-display text-xl font-bold text-lime">
-              {formatMoney(spot.nextBid)}
+          {/* La marca elige cuanto pagar. El minimo es el suelo, no el precio:
+              pujar mas alto encarece a quien quiera quitarle la zona despues. */}
+          <label className="mt-3 block">
+            <span className="mb-1.5 block text-xs uppercase tracking-wider text-white/50">
+              You pay
             </span>
-          </div>
-          {taken && (
-            <p className="mt-2 text-[11px] text-white/40">
-              Minimum increment {formatMoney(MIN_INCREMENT)}. If your brand held this spot
-              before, you only pay the difference.
-            </p>
-          )}
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-3 focus-within:border-lime">
+              <span className="font-display text-xl font-bold text-lime">$</span>
+              <input
+                required
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ""))}
+                aria-label="Amount to pay"
+                className="w-full bg-transparent font-display text-xl font-bold text-lime outline-none"
+              />
+            </div>
+          </label>
+
+          <p className="mt-2 text-[11px] text-white/40">
+            Minimum {formatMoney(spot.nextBid)}. Bid higher and it costs more for
+            the next brand to take this spot from you.
+          </p>
+
         </div>
 
         <form onSubmit={submit} className="space-y-4">
@@ -371,7 +397,7 @@ export default function BidModal({ spot, onClose }: Props) {
             disabled={submitting || cutting}
             className="w-full rounded-xl bg-lime py-4 font-display text-base font-bold text-black transition hover:bg-neon disabled:opacity-50"
           >
-            {submitting ? "Redirecting to Wompi…" : `Pay ${formatMoney(spot.nextBid)}`}
+            {submitting ? "Redirecting to Wompi…" : "Continue to payment"}
           </button>
           <p className="text-center text-[11px] text-white/35">
             Secure payment via Wompi. Your logo goes up once the transaction is approved.

@@ -51,9 +51,11 @@ export async function settleBid(
   const [spot] = await db.select().from(spots).where(eq(spots.id, bid.spotId)).limit(1);
   if (!spot) return { outcome: "unknown_reference" };
 
-  // El precio que esta puja buscaba alcanzar. No es lo que se cobro: una marca
-  // que regresa a una zona que ya ocupaba solo paga la diferencia.
-  const targetPrice = (bid.previousPrice ?? 0) + bid.amount;
+  // El precio al que queda la zona. Se guarda al crear la puja porque no se
+  // puede deducir de `amount`: ese es solo lo que se cobro, y difiere cuando
+  // una marca regresa a una zona que ya ocupaba o cuando puja por encima del
+  // minimo. La suma es el respaldo para las pujas creadas antes de la columna.
+  const targetPrice = bid.bidPrice ?? (bid.previousPrice ?? 0) + bid.amount;
 
   // Carrera perdida: mientras esta persona pagaba, otra se llevo la zona por
   // igual o mas. Se cobro el dinero, asi que queda marcado para devolucion.

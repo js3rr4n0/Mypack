@@ -1,0 +1,1 @@
+ALTER TABLE "bids" ADD COLUMN "bid_price" integer;
