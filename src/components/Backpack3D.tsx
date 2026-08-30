@@ -23,7 +23,7 @@ function useFabric(roughness = 0.86) {
   return useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#131313",
+        color: "#1b1b1d",
         roughness,
         metalness: 0.12,
       }),
@@ -248,7 +248,7 @@ function Pack({
   });
 
   return (
-    <group ref={group} position={[0, -0.1, 0]}>
+    <group ref={group} position={[0, 0.02, 0]}>
       {/* Cuerpo principal */}
       <RoundedBox
         args={[BODY_W * 2, BODY_H, BODY_D]}
@@ -269,15 +269,11 @@ function Pack({
         material={fabric}
       />
 
-      {/* Bolsillo frontal inferior */}
-      <RoundedBox
-        args={[BODY_W * 1.7, BODY_H * 0.3, 0.045]}
-        radius={0.035}
-        smoothness={5}
-        position={[0, -0.19, BODY_D / 2 + 0.02]}
-        castShadow
-        material={softFabric}
-      />
+      {/* Costura que separa los dos paneles frontales */}
+      <mesh position={[0, -0.02, BODY_D / 2 + 0.026]}>
+        <boxGeometry args={[BODY_W * 1.7, 0.008, 0.006]} />
+        <meshStandardMaterial color="#151517" roughness={0.9} />
+      </mesh>
 
       {/* Tirantes */}
       {[-0.17, 0.17].map((x) => (
@@ -296,14 +292,11 @@ function Pack({
         material={softFabric}
       />
 
-      {/* MOLLE frontal */}
-      {[-0.06, -0.13, -0.2].map((y) => (
-        <Webbing key={y} position={[0, y, BODY_D / 2 + 0.045]} width={0.34} />
-      ))}
-      {[-0.1, 0, 0.1].map((x) => (
-        <mesh key={x} position={[x, -0.13, BODY_D / 2 + 0.045]}>
-          <boxGeometry args={[0.014, 0.17, 0.014]} />
-          <meshStandardMaterial color="#0b0b0b" roughness={0.95} />
+      {/* Tiradores verticales a los lados del panel, como en la foto */}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * 0.24, -0.2, BODY_D / 2 + 0.022]}>
+          <boxGeometry args={[0.022, 0.26, 0.01]} />
+          <meshStandardMaterial color="#161618" roughness={0.95} />
         </mesh>
       ))}
 
@@ -380,14 +373,19 @@ export default function Backpack3D({
       <Canvas
         shadows
         dpr={[1, 2]}
-        camera={{ position: [0.9, 0.45, 1.5], fov: 38 }}
+        camera={{ position: [0.55, 0.2, 2.25], fov: 36 }}
         gl={{ antialias: true }}
       >
         <color attach="background" args={["#0a0a0a"]} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[3, 5, 3]} intensity={2.2} castShadow />
-        <directionalLight position={[-3, 2, -2]} intensity={0.8} color="#c6f432" />
-        <spotLight position={[0, 4, 2]} angle={0.6} intensity={1.4} penumbra={1} />
+        {/* Tela negra sobre fondo negro: sin una luz frontal fuerte y luces de
+            recorte en los bordes, la mochila desaparece. */}
+        <ambientLight intensity={0.55} />
+        <directionalLight position={[2, 3, 5]} intensity={1.7} castShadow />
+        <directionalLight position={[-4, 2, 3]} intensity={0.7} />
+        {/* Luces de recorte: dibujan el contorno para que la tela negra no se
+            funda con el fondo negro. */}
+        <directionalLight position={[4, 1, -3]} intensity={0.9} color="#c6f432" />
+        <directionalLight position={[-3, 1, -4]} intensity={0.7} color="#8fb3ff" />
 
         <Suspense fallback={null}>
           <Pack
@@ -400,20 +398,15 @@ export default function Backpack3D({
           {/* Iluminacion construida en el cliente. `preset` descargaria un HDR
               de un CDN externo, y si esa peticion falla la escena lanza y tumba
               la pagina entera. */}
-          <Environment resolution={128}>
-            <Lightformer intensity={2.2} position={[0, 3, 2]} scale={[6, 3, 1]} />
-            <Lightformer intensity={1.1} position={[-3, 1, 1]} scale={[3, 4, 1]} />
-            <Lightformer
-              intensity={0.8}
-              color="#c6f432"
-              position={[3, 0, -2]}
-              scale={[3, 3, 1]}
-            />
+          <Environment resolution={256}>
+            <Lightformer intensity={1.6} position={[0, 2, 4]} scale={[8, 5, 1]} />
+            <Lightformer intensity={1} position={[-4, 1, 2]} scale={[4, 6, 1]} />
+            <Lightformer intensity={0.9} position={[4, 1, 2]} scale={[4, 6, 1]} />
           </Environment>
         </Suspense>
 
         <ContactShadows
-          position={[0, -0.68, 0]}
+          position={[0, -0.55, 0]}
           opacity={0.55}
           scale={3}
           blur={2.6}
@@ -422,8 +415,8 @@ export default function Backpack3D({
 
         <OrbitControls
           enablePan={false}
-          minDistance={1.1}
-          maxDistance={2.6}
+          minDistance={1.6}
+          maxDistance={3.4}
           minPolarAngle={Math.PI / 5}
           maxPolarAngle={Math.PI / 1.75}
           enableDamping

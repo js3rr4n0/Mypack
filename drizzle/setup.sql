@@ -78,58 +78,58 @@ CREATE TABLE IF NOT EXISTS "webhook_events" (
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "needs_refund" boolean DEFAULT false;
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "settled_via" varchar(20);
 ALTER TABLE "bids" ADD COLUMN IF NOT EXISTS "wompi_link_id" varchar(50);
--- Liquidación manual de una puja pagada.
+-- Liquidación manual de una puja ya pagada.
 --
--- Úsalo SOLO si tienes el correo de Wompi confirmando el cobro y la página
--- /thanks?ref=… sigue diciendo "Confirming your payment" — es decir, cuando
--- ni el webhook ni la reconciliación automática lograron cerrarla.
+-- Úsalo solo si tienes el correo de Wompi confirmando el cobro y la página
+-- /thanks?ref=… no logró cerrarla sola. Compatible con el SQL Editor de Neon.
 --
--- Reemplaza la referencia en los TRES lugares donde aparece abajo por la tuya
--- y corre todo junto en el SQL Editor de Neon.
---
--- (Antes usaba \set, que solo funciona en la terminal psql, no en Neon.)
+-- Reemplaza los DOS valores de abajo por los tuyos antes de correrlo.
 
--- 1. Mirar qué hay antes de tocar nada.
-SELECT b.id, b.status, b.amount, b.previous_price, b.needs_refund,
-       s.name AS spot, s.current_price, br.name AS brand, br.email,
+-- 1. Ver qué hay ahora (no cambia nada).
+SELECT b.id, b.status, b.amount, b.previous_price, b.wompi_link_id,
+       s.name AS spot, s.current_price, br.name AS brand,
        (br.logo_url IS NOT NULL OR br.logo_base64 IS NOT NULL) AS tiene_logo
 FROM bids b
-JOIN spots s  ON s.id  = b.spot_id
+JOIN spots s   ON s.id  = b.spot_id
 JOIN brands br ON br.id = b.brand_id
 WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA';
 
--- 2. Liquidar: marca las pujas anteriores de esa zona como superadas,
---    aprueba esta, y le entrega la zona a la marca.
+-- 2. Liquidar: supera las pujas anteriores de esa zona, aprueba esta,
+--    y le entrega la zona a la marca.
 WITH target AS (
-  SELECT b.id, b.spot_id, b.brand_id,
-         (COALESCE(b.previous_price, 0) + b.amount) AS new_price
-  FROM bids b
-  WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA' AND b.status = 'pending'
+  SELECT id, spot_id, brand_id,
+         (COALESCE(previous_price, 0) + amount) AS new_price
+  FROM bids
+  WHERE wompi_reference = 'PON-AQUI-TU-REFERENCIA' AND status = 'pending'
 ),
 outbid AS (
   UPDATE bids SET is_outbid = true
   WHERE spot_id = (SELECT spot_id FROM target)
-    AND status = 'approved'
-    AND id <> (SELECT id FROM target)
+    AND status  = 'approved'
+    AND id     <> (SELECT id FROM target)
   RETURNING 1
 ),
 approve AS (
   UPDATE bids
-  SET status = 'approved', is_outbid = false, settled_via = 'manual'
+  SET status = 'approved',
+      is_outbid = false,
+      settled_via = 'manual',
+      wompi_transaction_id = 'PON-AQUI-EL-ID-DE-TRANSACCION'
   WHERE id = (SELECT id FROM target)
   RETURNING 1
 )
 UPDATE spots s
-SET current_brand_id = (SELECT brand_id FROM target),
+SET current_brand_id = (SELECT brand_id  FROM target),
     current_price    = (SELECT new_price FROM target)
 WHERE s.id = (SELECT spot_id FROM target);
 
 -- 3. Comprobar que quedó publicada.
-SELECT s.name, br.name AS brand, s.current_price, b.status, b.settled_via
+SELECT s.display_name, br.name AS brand, (s.current_price/100.0)::money AS precio,
+       b.status, b.settled_via
 FROM spots s
 JOIN brands br ON br.id = s.current_brand_id
-JOIN bids b    ON b.wompi_reference = 'PON-AQUI-TU-REFERENCIA'
-WHERE s.id = b.spot_id;
+JOIN bids b    ON b.spot_id = s.id
+WHERE b.wompi_reference = 'PON-AQUI-TU-REFERENCIA';
 
 -- Revisión del estado de mypack.lol. Solo lee, no cambia nada.
 -- Compatible con el SQL Editor de Neon: pégalo completo y dale Run.
@@ -207,7 +207,7 @@ SELECT '6. VISITAS' AS bloque, count(*) AS total FROM visits;
 INSERT INTO "spots" ("name", "display_name", "description", "position_order", "min_bid")
 VALUES
   ('main_front', 'Front Panel', 'The billboard. The biggest panel, and the one that spends the most time at eye level.', 1, 7500),
-  ('front_pocket', 'Front Pocket', 'Right below the main panel, on the MOLLE webbing.', 2, 3000),
+  ('front_pocket', 'Front Pocket', 'Right below the main panel, dead center of the front.', 2, 3000),
   ('left_top', 'Left Side · Top', 'Shoulder height. The first thing you see walking past me.', 3, 2500),
   ('left_mid', 'Left Side · Middle', 'Dead center of the flank. On show all day in the bus and the elevator.', 4, 2000),
   ('left_bottom', 'Left Side · Bottom', 'On the MOLLE, next to the bottle pocket.', 5, 100),
